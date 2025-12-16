@@ -1,0 +1,6 @@
+node_modules/
+__pycache__/
+.env
+venv/
+temp_design_repo/
+.DS_Store

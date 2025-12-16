@@ -1,0 +1,58 @@
+### Project: Grocery-Price Tracker
+
+**1. Data Handling & Backend**
+*   [x] Use Supabase for data storage.
+*   [ ] (Optional) Use Spark for data aggregation (e.g., average price per week/weekday).
+*   [x] Feature Engineering with NumPy:
+    *   [x] Calculate rolling averages for prices.
+    *   [x] Calculate price volatility.
+    *   [x] Determine min/median/max price per weekday. (Cheapest weekday is determined)
+
+**2. Machine Learning Model**
+*   [x] Develop a simple baseline model (e.g., linear regression) to predict prices.
+*   [x] Create a function that, for a given item, predicts the price for the next 7 days.
+*   [x] Identify and return the day with the lowest predicted price as the "suggested buying day".
+*   [ ] Build a PyTorch model to predict expected price or discount probability based on features (`weekday`, `days_to_salary`, `store_id`, `month`).
+
+**3. User Interface (GUI)**
+*   [x] Set default window size to 800x600px (fixed).
+*   [x] **Left-Top: Search Bar**
+    *   [x] Implement a text box for item search.
+    *   [x] Update the color of the search bar to white, and the enter text be black.
+    *   [x] Narrow down the height of the search panel, to just fit the title "Search", and the search bar; and the search button.
+    *   [x] Add a dropdown to show matching items from the database.
+    *   [x] Update the search engine to Product; brand.
+    *   [x] The brand name option should only when its really exit in the product type.
+    *   [x] Display a "No such item" message if the item is not found. (Implicitly handled by empty table/recommendation)
+*   [x] **Left-Bottom: Recommendation Panel**
+    *   [x] Display the "suggested buying day" and predicted price.
+    *   [x] Show a textual breakdown (cheapest weekday, typical discount, etc.).
+    *   [x] Change the text of prediction reuslt to red.
+*   [x] **Right-Top: Historical Data Table**
+    *   [x] Display historical data (Date, Price, Supermarket, Location).
+    *   [x] Update the table column to DATE, PRICE, avgPrice/g or /ml, SUPERMARKET, LOCATION.
+    *   [x] The column name on the table should be fully shown.
+    *   [x] Table size fits to the existing table width.
+    *   [x] Make table headers clickable for sorting.
+*   [x] **Right-Bottom: Historical Chart**
+    *   [x] Generate a bar or line chart of price vs. date.
+    *   [x] Provide (Monday, Tuesday...) on the x-axis.
+    *   [x] Smaller the lable of x-axis.
+    *   [x] The legend and axes of the plotting should be default existed.
+    *   [x] The legend on the plot should not be overlapped the plotting.
+    *   [x] The x-label should not be overlapped to each other.
+    *   [x] The y-axis interval to be every 0.2 euros.
+    *   [x] Color-code the chart by supermarket or location.
+    *   [x] Embed the chart in the GUI.
+    *   [x] Show info (Date, Price) when user hovers over a data point.
+
+**4. Image Processing for Receipts (Optional)**
+*   [ ] Allow users to upload receipt images.
+*   [ ] Use OpenCV or Pillow for image preprocessing (grayscale, threshold, crop).
+*   [ ] Implement a basic OCR pipeline or a manual-assist feature to extract data from images.
+
+**5. Fun Enhancements**
+*   [x] Add commentary to recommendations (e.g., "'too lazy to wait' tax"). (Basic witty comment in `ml_model.py`)
+*   [x] Display the model's confidence level ("risk level") for its predictions.
+
+**Note:** `seed.py` was removed as sample data is already present in Supabase.

@@ -1,0 +1,52 @@
+This grocery‑price tracker is a solid project idea and easier to finish than the UAV tool, while still letting you use all the libs you want.[1]
+
+## Feasibility as course project
+
+- It fits the course: stand‑alone Python app, clear GUI, data I/O (receipts in, predictions and charts out), and an ML component to suggest buy date/price.[1]
+- Scope is controllable: you can restrict to a few items (coffee, milk, noodles) and 1–2 months of data, and still show meaningful time‑series trends and recommendations.[1]
+
+## How to use all the libraries
+
+- **Pandas / NumPy / SQL / Spark**:  
+  - Parse uploaded receipt CSVs (or manually entered records) into a DataFrame with columns: `item_name, date, price, supermarket, location`.  
+  - Store the cleaned data in SQLite; optional Spark job to aggregate by week or weekday pattern (e.g. average price per weekday).  
+  - Use NumPy for feature engineering: rolling averages, price volatility, min/median/max per weekday.
+
+- **PyTorch (ML model)**:  
+  - Build a tiny model (or even simple linear baseline first) that learns a mapping from features like `weekday, days_to_salary, store_id, month` to expected price or discount probability.  
+  - Given today’s date and item, the model predicts expected price for each upcoming day in the next week; you choose the day with lowest predicted price as the “suggested buying day” and show predicted price.
+
+- **OpenCV or Pillow**:  
+  - For receipt upload, allow image receipts: use OpenCV/Pillow for basic preprocessing (grayscale, thresholding, crop) and either a simple OCR pipeline or manual “assist” (first version can just accept CSV, but showing you can load and display the receipt image already demonstrates the library).  
+  - Also generate the chart image: if you don’t use matplotlib directly, you can draw a simple bar chart using Pillow/OpenCV and then display it in the right‑bottom pane.
+
+## UI layout (matching your sketch)
+
+- **Left‑top: search bar**  
+  - Text box + dropdown of matching item names from the DB.  
+  - If no match: show “No such item in history yet.”  
+
+- **Left‑bottom: recommendation panel**  
+  - For selected item, run the ML model on the next 7–14 days and display:  
+    - “You should buy on: Monday (avg. predicted price: 1.29 € at Aldi).”  
+    - Maybe a small textual breakdown: cheapest weekday, typical discount size, most frequent cheapest supermarket.  
+
+- **Right‑top: historical table**  
+  - Table with columns: Date, Price, Supermarket, Location; sortable by clicking headers.  
+  - Backed by a Pandas DataFrame view from SQLite / Spark aggregates.  
+
+- **Right‑bottom: historical chart**  
+  - Bar or line chart with x‑axis = date, y‑axis = price.  
+  - Colour bars by supermarket or location.  
+  - Generated either via a plotting lib or manually composed with Pillow/OpenCV, then embedded in the GUI.
+
+## Enhancing with a light “ridiculous/fun” angle
+
+To keep it in your style, you can add:
+
+- Small comments under the recommendation like “If you buy today, you pay the ‘too lazy to wait’ tax of +0.30 €.”  
+- An optional “risk level” from the model (how confident it is that the price will be lower later this week).
+
+So yes: this receipt‑based price advisor is fully doable, shows clear ML + data‑engineering skills, and matches the UI you sketched, while comfortably fitting the course’s stand‑alone GUI + data I/O requirement.[1]
+
+[1](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/images/62995950/8ead02f6-66e7-4723-810a-ebab3db8ed0b/image.jpg?AWSAccessKeyId=ASIA2F3EMEYEQPRTS2UF&Signature=Q57%2Bwd185f48hXGm6242u9sM0AQ%3D&x-amz-security-token=IQoJb3JpZ2luX2VjEKL%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLWVhc3QtMSJGMEQCIAQvxZ4QxlOqlTzAq1Fayhho0pwAkGJRL%2FzlOIEtvALMAiBD3qcQBNbryyW2Q3gy%2BpVQLYR1NLRGQSiMBWeE8Fev2SrzBAhqEAEaDDY5OTc1MzMwOTcwNSIMyYGxS0m16COkqSzpKtAEnoH1I9gDlbablFuCjJMhc0T4aM4up2oegw7tHjnwU%2BF5sBrBOEFHyGma4ErkHVyB4pRhBBJYy0EGWKXfsGmX%2BXRaRZsQwf3T6TAJhy7mU6sKtg5N8wjvGsZaSV9RWjMi855dGv5YY0H%2BnFtotkOdX2VhsWHUWY%2FI5a9cC%2BXungsdIyeFilZzoJPP7XYTX1lnXR%2FrsRxMJ7A6YOu1izWjKKATMYRNnSWF%2FoW4zfT788c2Et4uwSHF7gjigZDXV1tBukroeenPY4QwWmRc%2FuElt0Pp0dN7SAcb1Qpy%2FQYP2VJHyNxGvhB%2Fh1yblsW%2BBAQjdMux%2Bs1Dvq0zNxicI5wd%2B1%2BV7LiNoYi1z3WMX4ARHB2DnrplozhfaSSllbvYNmwNCGX9BrPsMcuZGlTEe2Q%2FAuti7ytF0ekC2YptUV4DIDyvwUwlvJEHIPiZhXogn8uq6PSWxpVh9mBqvVbK1jck%2FUxQVKV2%2BaqK1uWU2Vtvu1wCAUrrzZJGAAdMRLA5uIf%2BZTf0atq4EJcbKLsPDF9F5oBUdveGp5AD6wn8IZFQHAQ9JNxURharAN8SGNZWUkn%2BMQMzzicOFF%2BIiRIr8yo0jjmDRvns3gtE264vaQL1l9YVPmfM8xwV6RYBRUX9p%2Bon%2Ben5hZ5T7K1%2F%2BTdqpUlM5ybC0P2k7qYDhAjTyxBycYh2lV%2B238cqun2l5UCRwskWxrzvhr5%2B%2BbNx4Cbpljz27m7%2B74let9z0Fhlx1092l6TkLPPumIiHbYPncTEyEPAj8pxO1CYjpvzqWbGpLJl2ejDmpobKBjqZARZPPBJlHCNEEeDWPKbfS%2BPs3jaBuMdsnC%2BP8QtHjM7Nw7yNxpMqixqrE%2FGl7GYm9xTI59LslT9btaWEk2fgcBx%2BUDTZueXGsuBjuDqd9GMHHCllYyghQG8%2BqIpsWNuX32YgYZQc530Z2RWIkS2b%2FZ4JpcPeBGTb0ujCHm6M8RkQnfnLN6ihpiwznTzhbu%2B3KSZSSXvZRhVUIw%3D%3D&Expires=1765906523)
