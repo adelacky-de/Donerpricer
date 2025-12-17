@@ -40,16 +40,10 @@ class PriceChart(QWidget):
             # Use ink-black for the line
             ax.step(df['date'], df['price'], where='post', color='#1a1a1a', linewidth=2, marker='o', markersize=4, markerfacecolor='white', markeredgecolor='#1a1a1a')
             
-            # Add labels for each data point
-            for date, price in zip(df['date'], df['price']):
-                ax.annotate(f"€{price:.2f}", (date, price),
-                            textcoords="offset points", xytext=(0,5),
-                            ha='center', va='bottom', fontsize=7, color='#1a1a1a', fontfamily='Courier Prime')
-            
             # Set x-axis tick labels
             ax.xaxis.set_major_formatter(mdates.DateFormatter('%d/%m'))
-            ax.tick_params(axis='x', labelsize=8, colors='#1a1a1a', labelfontfamily='Courier Prime')
-            ax.tick_params(axis='y', labelsize=8, colors='#1a1a1a', labelfontfamily='Courier Prime')
+            ax.tick_params(axis='x', labelsize=8, colors='#1a1a1a', family='Courier Prime')
+            ax.tick_params(axis='y', labelsize=8, colors='#1a1a1a', family='Courier Prime')
             
             # Set y-axis interval
             ax.yaxis.set_major_locator(mticker.MultipleLocator(0.2))

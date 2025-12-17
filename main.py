@@ -345,7 +345,6 @@ class MainWindow(QMainWindow):
         self.history_table.horizontalHeader().sectionClicked.connect(self.sort_table)
         self.history_table.setMinimumHeight(200)
         table_inner_layout.addWidget(self.history_table)
-        self.history_table.hide()
         
         table_panel_layout.addWidget(table_inner)
         main_layout.addWidget(table_panel, 0) # Fit to content
@@ -358,17 +357,12 @@ class MainWindow(QMainWindow):
         
         chart_inner = QWidget()
         chart_inner.setProperty("class", "vintage-panel-inner")
-        chart_content_layout = QVBoxLayout(chart_content)
-        chart_content_layout.setContentsMargins(15, 5, 15, 5) # Adjust margins
+        chart_inner_layout = QVBoxLayout(chart_inner)
         
         chart_title = QLabel("Market Fluctuations")
         chart_title.setProperty("class", "panel-title")
         chart_title.setAlignment(Qt.AlignCenter)
-        chart_content_layout.addWidget(chart_title)
-        
-        chart_subtitle = QLabel("Price History Analysis") # Added subtitle
-        chart_subtitle.setAlignment(Qt.AlignCenter)
-        chart_content_layout.addWidget(chart_subtitle)
+        chart_inner_layout.addWidget(chart_title)
         
         chart_subtitle = QLabel("Price History Analysis")
         chart_subtitle.setProperty("class", "panel-subtitle")
@@ -379,7 +373,6 @@ class MainWindow(QMainWindow):
         self.price_chart.setObjectName("chart-panel")
         self.price_chart.setMinimumHeight(250)
         chart_inner_layout.addWidget(self.price_chart)
-        self.price_chart.hide()
         
         chart_panel_layout.addWidget(chart_inner)
         main_layout.addWidget(chart_panel, 2)
@@ -406,7 +399,6 @@ class MainWindow(QMainWindow):
 
         self.vintage_map = VintageMap()
         map_inner_layout.addWidget(self.vintage_map)
-        self.vintage_map.hide()
         
         map_panel_layout.addWidget(map_inner)
         main_layout.addWidget(map_panel, 1)
@@ -446,9 +438,6 @@ class MainWindow(QMainWindow):
             self.confidence_label.setText(f"Confidence Index: {confidence}")
             
             self.price_chart.plot(df)
-            self.history_table.show()
-            self.price_chart.show()
-            self.vintage_map.show()
             self.vintage_map.update_map(df)
             self.record_count_label.setText(f"REC: {len(df)}")
 
