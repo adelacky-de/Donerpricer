@@ -15,7 +15,8 @@ from PySide6.QtWidgets import (
     QComboBox,
     QCompleter,
     QHeaderView,
-    QScrollArea, # Added QScrollArea
+    QScrollArea,
+    QFrame, # Added QFrame
 )
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont, QFontDatabase
@@ -77,6 +78,13 @@ class MainWindow(QMainWindow):
         masthead_layout.addWidget(title)
         main_layout.addWidget(masthead)
 
+        # Add horizontal double line under masthead
+        masthead_separator = QFrame()
+        masthead_separator.setFrameShape(QFrame.HLine)
+        masthead_separator.setFrameShadow(QFrame.Sunken)
+        masthead_separator.setLineWidth(2)
+        main_layout.addWidget(masthead_separator)
+
         # --- Main Content (Vertical Stack) ---
         # 1. Search Bar
         search_widget = QWidget()
@@ -118,20 +126,30 @@ class MainWindow(QMainWindow):
         # 2. Recommendation Panel
         recommendation_widget = QWidget()
         recommendation_widget.setObjectName("recommendation-panel")
-        recommendation_layout = QVBoxLayout(recommendation_widget)
+        recommendation_layout = QHBoxLayout(recommendation_widget) # Changed to QHBoxLayout
 
-        self.recommendation_header = QLabel("Prediction:")
-        self.recommendation_header.setObjectName("recommendation-header")
-        recommendation_layout.addWidget(self.recommendation_header)
-
+        # Left side: Recommendation Label
+        details_container = QVBoxLayout()
         self.recommendation_label = QLabel("Best day to buy: -\nBest Price: -\nConfidence: -")
         self.recommendation_label.setObjectName("recommendation-label")
         self.recommendation_label.setWordWrap(True)
-        recommendation_layout.addWidget(self.recommendation_label)
+        details_container.addWidget(self.recommendation_label, alignment=Qt.AlignCenter) # Vertically center
+        recommendation_layout.addLayout(details_container, 7) # Set stretch factor to 7
 
-        self.confidence_label = QLabel("Confidence: N/A")
-        self.confidence_label.setObjectName("confidence-label")
-        recommendation_layout.addWidget(self.confidence_label)
+        # Add a vertical double line separator
+        separator = QFrame()
+        separator.setFrameShape(QFrame.VLine)
+        separator.setFrameShadow(QFrame.Sunken) # Set shadow
+        separator.setLineWidth(2) # Set line width
+        recommendation_layout.addWidget(separator)
+
+        # Right side: Recommendation Header
+        header_container = QVBoxLayout()
+        self.recommendation_header = QLabel("Prediction:")
+        self.recommendation_header.setObjectName("recommendation-header")
+        header_container.addWidget(self.recommendation_header, alignment=Qt.AlignCenter) # Vertically center
+        recommendation_layout.addLayout(header_container, 3) # Set stretch factor to 3
+        
         main_layout.addWidget(recommendation_widget, 1) # Give some stretch
 
         # 3. Historical Table

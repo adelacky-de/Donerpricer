@@ -148,6 +148,6 @@ def get_recommendation(df):
     recommendation_header_str = "Prediction"
     recommendation_str = ""
     recommendation_str += f"Best day to buy: {best_day}\n"
-    recommendation_str += f"Best Price: {predicted_price:.2f} €"
+    recommendation_str += f"Best Price: {predicted_price:.2f} €\n"
     recommendation_str += f"Confidence: {confidence:.2f}%"
     return {"recommendation_header":recommendation_header_str, "recommendation": recommendation_str}

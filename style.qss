@@ -5,6 +5,12 @@ QWidget {
     color: #1a1a1a; /* ink */
 }
 
+QFrame {
+    border: none; /* Remove default border */
+    background-color: transparent;
+    color: #1a1a1a; /* Set color for the line */
+}
+
 /* Masthead */
 #masthead {
     border-bottom: 4px double #1a1a1a;
@@ -64,18 +70,20 @@ QWidget {
 
 #recommendation-panel-inner {
     border: 1px solid #1a1a1a;
-    padding: 10px;
+    padding: 20px; /* Increased padding */
 }
 
 #recommendation-header {
     font-family: "Tangerine", cursive;
-    font-size: 24px;
+    font-size: 56px; /* Enlarged font size */
     color: black;
 }
 
 #recommendation-label, #confidence-label {
-    font-family: "Tangerine", cursive;
-    color: black;
+    font-family: "Playfair Display", serif; /* Aligned with search-title */
+    font-weight: bold; /* Aligned with search-title */
+    color: black; /* Default color */
+    font-size: 16px; /* Enlarged text */
 }
 
 /* Table */
