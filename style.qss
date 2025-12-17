@@ -11,6 +11,11 @@ QFrame {
     color: #1a1a1a; /* Set color for the line */
 }
 
+#recommendation-separator {
+    border-left: 2px double #1a1a1a; /* Double line border on the left */
+    margin: 0 5px; /* Add some horizontal margin */
+}
+
 /* Masthead */
 #masthead {
     border-bottom: 4px double #1a1a1a;

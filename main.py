@@ -23,6 +23,7 @@ from PySide6.QtGui import QFont, QFontDatabase
 import database
 import ml_model
 from price_chart import PriceChart
+# from vertical_double_line import VerticalDoubleLine # Removed import
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -91,7 +92,7 @@ class MainWindow(QMainWindow):
         search_widget.setObjectName("search-panel")
         search_layout = QVBoxLayout(search_widget)
         search_layout.setContentsMargins(10, 10, 10, 10) # Add some padding
-        search_layout.setSpacing(10) # Adjust spacing
+        search_layout.setSpacing(15) # Adjust spacing to 15px
         search_title = QLabel("Search Archives")
         search_title.setObjectName("search-title")
         search_layout.addWidget(search_title)
@@ -113,7 +114,7 @@ class MainWindow(QMainWindow):
         self.brand_input.setPlaceholderText("Brand (Optional)")
         self.brand_input.setInsertPolicy(QComboBox.NoInsert)
         self.brand_input.completer().setCompletionMode(QCompleter.PopupCompletion)
-        self.brand_input.setVisible(False)
+        self.brand_input.setVisible(True) # Ensure it's initially visible
         
         search_layout.addWidget(self.brand_input)
 
@@ -135,11 +136,11 @@ class MainWindow(QMainWindow):
         header_container.addWidget(self.recommendation_header, alignment=Qt.AlignCenter) # Vertically center
         recommendation_layout.addLayout(header_container, 3) # Set stretch factor to 3
 
-        # Add a vertical double line separator
+        # Add a vertical double line separator (using QFrame)
         separator = QFrame()
+        separator.setObjectName("recommendation-separator")
         separator.setFrameShape(QFrame.VLine)
-        separator.setFrameShadow(QFrame.Sunken) # Set shadow
-        separator.setLineWidth(2) # Set line width
+        separator.setFixedWidth(4) # Set fixed width for the QFrame
         recommendation_layout.addWidget(separator)
 
         # Right side: Recommendation Label
@@ -219,7 +220,8 @@ class MainWindow(QMainWindow):
             self.brand_input.setVisible(True)
         else:
             self.brand_input.clear()
-            self.brand_input.setVisible(False)
+            # self.brand_input.setVisible(False) # Removed to keep it always visible
+            self.brand_input.setVisible(True) # Ensure it's visible even if no brands
 
 
 if __name__ == "__main__":
