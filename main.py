@@ -26,13 +26,30 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
+# Placeholder for VintageMap
+class VintageMap(QWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setObjectName("vintage-map-panel")
+        layout = QVBoxLayout(self)
+        label = QLabel("Vintage Map Placeholder")
+        label.setAlignment(Qt.AlignCenter)
+        layout.addWidget(label)
+        self.setMinimumHeight(200) # Give it some initial height
+
+class MainWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
+
         self.setWindowTitle("The Dönerpricer")
-        self.setFixedSize(800, 900)
+        self.setMinimumSize(800, 600) # Allow resizing, but maintain minimum
 
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
 
         main_layout = QVBoxLayout(central_widget)
+        main_layout.setContentsMargins(10, 10, 10, 10) # Add some padding
+        main_layout.setSpacing(10) # Adjust spacing
 
         # --- Masthead ---
         masthead = QWidget()
@@ -55,12 +72,8 @@ class MainWindow(QMainWindow):
         masthead_layout.addWidget(title)
         main_layout.addWidget(masthead)
 
-        # --- Main Content ---
-        content_widget = QWidget()
-        grid_layout = QGridLayout(content_widget)
-        main_layout.addWidget(content_widget)
-
-        # Left-top: Search Bar
+        # --- Main Content (Vertical Stack) ---
+        # 1. Search Bar
         search_widget = QWidget()
         search_widget.setObjectName("search-panel")
         search_layout = QVBoxLayout(search_widget)
@@ -70,69 +83,63 @@ class MainWindow(QMainWindow):
         search_title.setObjectName("search-title")
         search_layout.addWidget(search_title)
         
-        self.search_input = QComboBox() # Changed to QComboBox
+        self.search_input = QComboBox()
         self.search_input.setEditable(True)
         self.search_input.setPlaceholderText("Product Name")
         self.search_input.setInsertPolicy(QComboBox.NoInsert)
         self.search_input.completer().setCompletionMode(QCompleter.PopupCompletion)
         
-        # Populate with item names
         item_names = database.get_all_item_names()
         self.search_input.addItems(item_names)
-        
-        self.search_input.currentTextChanged.connect(self.update_brand_input) # Connect signal
+        self.search_input.currentTextChanged.connect(self.update_brand_input)
         
         search_layout.addWidget(self.search_input)
         
-        self.brand_input = QComboBox() # Changed to QComboBox
+        self.brand_input = QComboBox()
         self.brand_input.setEditable(True)
         self.brand_input.setPlaceholderText("Brand (Optional)")
         self.brand_input.setInsertPolicy(QComboBox.NoInsert)
         self.brand_input.completer().setCompletionMode(QCompleter.PopupCompletion)
-        self.brand_input.setVisible(False) # Initially hidden
+        self.brand_input.setVisible(False)
         
         search_layout.addWidget(self.brand_input)
 
         self.search_button = QPushButton("Search")
         self.search_button.clicked.connect(self.search_item)
-        # Connect QComboBox signal as well
         self.search_input.activated.connect(self.search_item) 
         search_layout.addWidget(self.search_button)
-        grid_layout.addWidget(search_widget, 0, 0)
+        main_layout.addWidget(search_widget, 1) # Give some stretch
 
-        # Left-bottom: Recommendation Panel
+        # 2. Recommendation Panel
         recommendation_widget = QWidget()
         recommendation_widget.setObjectName("recommendation-panel")
         recommendation_layout = QVBoxLayout(recommendation_widget)
         self.recommendation_label = QLabel("Recommendation will be shown here.")
         self.recommendation_label.setWordWrap(True)
         recommendation_layout.addWidget(self.recommendation_label)
-        self.confidence_label = QLabel("Confidence: N/A") # New confidence label
+        self.confidence_label = QLabel("Confidence: N/A")
         recommendation_layout.addWidget(self.confidence_label)
-        grid_layout.addWidget(recommendation_widget, 1, 0)
+        main_layout.addWidget(recommendation_widget, 1) # Give some stretch
 
-        # Right Panel
-        right_panel = QWidget()
-        right_panel_layout = QVBoxLayout(right_panel)
-        grid_layout.addWidget(right_panel, 0, 1, 2, 1)
-
-        # Right-top: Historical Table
+        # 3. Historical Table
         self.history_table = QTableWidget()
         self.history_table.setColumnCount(5)
         self.history_table.setHorizontalHeaderLabels(["DATE", "PRICE", "avgPrice/g or /ml", "SUPERMARKET", "LOCATION"])
-        self.history_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents) # Resize columns to contents
-        self.history_table.horizontalHeader().setStretchLastSection(True) # Stretch last section
-        self.history_table.horizontalHeader().sectionClicked.connect(self.sort_table) # Connect sorting
-        right_panel_layout.addWidget(self.history_table, 2) # Give more stretch to table
+        self.history_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
+        self.history_table.horizontalHeader().setStretchLastSection(True)
+        self.history_table.horizontalHeader().sectionClicked.connect(self.sort_table)
+        self.history_table.setMinimumHeight(200) # Set a minimum height
+        main_layout.addWidget(self.history_table, 2) # Give more stretch
 
-        # Right-bottom: Historical Chart
+        # 4. Historical Chart
         self.price_chart = PriceChart()
         self.price_chart.setObjectName("chart-panel")
-        right_panel_layout.addWidget(self.price_chart, 1) # Give less stretch to chart
+        self.price_chart.setMinimumHeight(200) # Set a minimum height
+        main_layout.addWidget(self.price_chart, 2) # Give more stretch
 
-        # Set column stretch
-        grid_layout.setColumnStretch(0, 1)
-        grid_layout.setColumnStretch(1, 2)
+        # 5. Vintage Map (Placeholder)
+        vintage_map_widget = VintageMap()
+        main_layout.addWidget(vintage_map_widget, 1) # Give some stretch
 
         self.current_sort_column = -1
         self.sort_order = Qt.AscendingOrder

@@ -9,7 +9,7 @@ import matplotlib.ticker as mticker
 class PriceChart(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.figure = Figure(figsize=(5, 3), dpi=100)
+        self.figure = Figure(figsize=(8, 6), dpi=100) # Increased figsize
         self.canvas = FigureCanvas(self.figure)
         layout = QVBoxLayout()
         layout.addWidget(self.canvas)
@@ -40,7 +40,7 @@ class PriceChart(QWidget):
             # Set y-axis interval
             ax.yaxis.set_major_locator(mticker.MultipleLocator(0.2))
             
-            self.figure.tight_layout(rect=[0, 0.1, 0.85, 0.9]) # Adjust layout to make room for legend
+            self.figure.tight_layout(rect=[0, 0.15, 0.85, 0.95]) # Adjusted rect for more margin
             
             # Add legend at the bottom
             self.figure.legend(lines, [l.get_label() for l in lines], loc='center left', bbox_to_anchor=(0.85, 0.5))
