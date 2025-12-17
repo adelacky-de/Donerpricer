@@ -14,7 +14,8 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
     QComboBox,
     QCompleter,
-    QHeaderView, # Added QHeaderView
+    QHeaderView,
+    QScrollArea, # Added QScrollArea
 )
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QFontDatabase
@@ -44,10 +45,14 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("The Dönerpricer")
         self.setMinimumSize(800, 600) # Allow resizing, but maintain minimum
 
-        central_widget = QWidget()
-        self.setCentralWidget(central_widget)
+        central_content_widget = QWidget() # Renamed to central_content_widget
+        
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setWidget(central_content_widget)
+        self.setCentralWidget(scroll_area)
 
-        main_layout = QVBoxLayout(central_widget)
+        main_layout = QVBoxLayout(central_content_widget) # Layout for the scrollable content
         main_layout.setContentsMargins(10, 10, 10, 10) # Add some padding
         main_layout.setSpacing(10) # Adjust spacing
 
@@ -114,9 +119,15 @@ class MainWindow(QMainWindow):
         recommendation_widget = QWidget()
         recommendation_widget.setObjectName("recommendation-panel")
         recommendation_layout = QVBoxLayout(recommendation_widget)
-        self.recommendation_label = QLabel("Recommendation will be shown here.")
+
+        self.recommendation_header = QLabel("Recommendation:")
+        self.recommendation_header.setObjectName("recommendation-header")
+        recommendation_layout.addWidget(self.recommendation_header)
+
+        self.recommendation_label = QLabel("Perform a search to get a recommendation.")
         self.recommendation_label.setWordWrap(True)
         recommendation_layout.addWidget(self.recommendation_label)
+
         self.confidence_label = QLabel("Confidence: N/A")
         recommendation_layout.addWidget(self.confidence_label)
         main_layout.addWidget(recommendation_widget, 1) # Give some stretch
@@ -152,8 +163,8 @@ class MainWindow(QMainWindow):
             self.current_df = df # Store DataFrame for sorting
             self.populate_table(df)
             ml_result = ml_model.get_recommendation(df) # Get dict result
+            self.recommendation_header.setText(ml_result["recommendation_header"])
             self.recommendation_label.setText(ml_result["recommendation"])
-            self.confidence_label.setText(f"Confidence: {ml_result['confidence']}%") # Display confidence
             self.price_chart.plot(df)
 
     def populate_table(self, df):

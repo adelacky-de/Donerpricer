@@ -2,6 +2,26 @@ import pandas as pd
 import numpy as np
 from sklearn.linear_model import LinearRegression
 from datetime import datetime, timedelta
+import torch
+import torch.nn as nn
+import torch.optim as optim
+
+# Define the PyTorch model
+class PricePredictor(nn.Module):
+    def __init__(self, input_size):
+        super(PricePredictor, self).__init__()
+        self.fc1 = nn.Linear(input_size, 64)
+        self.relu = nn.ReLU()
+        self.fc2 = nn.Linear(64, 32)
+        self.fc3 = nn.Linear(32, 1)
+
+    def forward(self, x):
+        x = self.fc1(x)
+        x = self.relu(x)
+        x = self.fc2(x)
+        x = self.relu(x)
+        x = self.fc3(x)
+        return x
 
 def get_recommendation(df):
     """
@@ -18,34 +38,59 @@ def get_recommendation(df):
     # Feature Engineering
     df['day_of_week'] = df['date'].dt.dayofweek
     df['day_of_year'] = df['date'].dt.dayofyear
+    df['month'] = df['date'].dt.month
     
     # Calculate rolling average and volatility
     df['rolling_avg'] = df['price'].rolling(window=min(7, len(df)), min_periods=1).mean()
     df['price_volatility'] = df['price'].rolling(window=min(7, len(df)), min_periods=1).std().fillna(0)
 
-    # One-hot encode brand_name
-    df = pd.get_dummies(df, columns=['brand_name'], prefix='brand')
+    # One-hot encode categorical features
+    df = pd.get_dummies(df, columns=['brand_name', 'supermarket', 'location'], prefix=['brand', 'supermarket', 'location'])
 
     # Prepare features and target
-    features = ['day_of_year', 'day_of_week', 'rolling_avg', 'price_volatility', 'weight_grams']
-    # Add brand columns to features
-    brand_columns = [col for col in df.columns if col.startswith('brand_')]
-    features.extend(brand_columns)
+    features = ['day_of_year', 'day_of_week', 'month', 'rolling_avg', 'price_volatility', 'weight_grams']
+    # Add one-hot encoded columns to features
+    categorical_columns = [col for col in df.columns if col.startswith(('brand_', 'supermarket_', 'location_'))]
+    features.extend(categorical_columns)
     
+    # Fill NaN values in weight_grams with 0
+    df['weight_grams'] = df['weight_grams'].fillna(0)
+
     # Ensure all feature columns exist, fill missing with 0
     for col in features:
         if col not in df.columns:
             df[col] = 0
-
-    # Fill NaN values in weight_grams with 0
-    df['weight_grams'] = df['weight_grams'].fillna(0)
-
+    
+    # Filter features to only include those present in the DataFrame
     X = df[features]
     y = df['price']
 
-    # Train Model
-    model = LinearRegression()
-    model.fit(X, y)
+    print("df dtypes before tensor conversion:")
+    print(df.dtypes)
+    print("X dtypes before tensor conversion:")
+    print(X.dtypes)
+
+    # Convert to PyTorch tensors
+    X_tensor = torch.tensor(X.values, dtype=torch.float32)
+    y_tensor = torch.tensor(y.values, dtype=torch.float32).view(-1, 1)
+
+    # Initialize model, loss, and optimizer
+    input_size = X_tensor.shape[1]
+    model = PricePredictor(input_size)
+    criterion = nn.MSELoss()
+    optimizer = optim.Adam(model.parameters(), lr=0.01)
+
+    # Training loop
+    num_epochs = 100
+    for epoch in range(num_epochs):
+        # Forward pass
+        outputs = model(X_tensor)
+        loss = criterion(outputs, y_tensor)
+
+        # Backward and optimize
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
 
     # Predict for the next 7 days
     today = datetime.now()
@@ -56,22 +101,29 @@ def get_recommendation(df):
     future_features_data = {
         'day_of_year': [d.timetuple().tm_yday for d in future_dates],
         'day_of_week': [d.weekday() for d in future_dates],
+        'month': [d.month for d in future_dates],
         'rolling_avg': [last_row['rolling_avg']] * 7,
         'price_volatility': [last_row['price_volatility']] * 7,
         'weight_grams': [last_row['weight_grams']] * 7,
     }
-    for col in brand_columns:
+    
+    # Add one-hot encoded columns for future features
+    for col in categorical_columns:
         future_features_data[col] = [last_row[col]] * 7
 
-    future_features = pd.DataFrame(future_features_data)
+    future_features_df = pd.DataFrame(future_features_data)
     
-    # Ensure future_features has the same columns as X
+    # Ensure future_features_df has the same columns as X
     for col in X.columns:
-        if col not in future_features.columns:
-            future_features[col] = 0
-    future_features = future_features[X.columns] # Ensure order is the same
+        if col not in future_features_df.columns:
+            future_features_df[col] = 0
+    future_features_df = future_features_df[X.columns] # Ensure order is the same
 
-    predictions = model.predict(future_features)
+    # Convert future features to PyTorch tensor and make predictions
+    future_features_tensor = torch.tensor(future_features_df.values, dtype=torch.float32)
+    model.eval() # Set model to evaluation mode
+    with torch.no_grad():
+        predictions = model(future_features_tensor).numpy().flatten()
     
     # Find best day to buy
     best_day_index = np.argmin(predictions)
@@ -87,9 +139,8 @@ def get_recommendation(df):
         confidence = 100
     else:
         confidence = max(0, min(100, int(100 - (df['price_volatility'].mean() * 50)))) # Scale volatility to confidence
-
-    recommendation_str = f"ᝰ.ᐟ\nAverage price: {avg_price:.2f} €\n"
-    recommendation_str += f"Predicted best day to buy: {best_day}\n"
-    recommendation_str += f"Predicted price: {predicted_price:.2f} €"
-    
-    return {"recommendation": recommendation_str, "confidence": confidence}
+    recommendation_header_str = "Prediction"
+    recommendation_str += f"Best day to buy: {best_day}\n"
+    recommendation_str += f"Best Price: {predicted_price:.2f} €"
+    recommendation_str += f"Confidence: {confidence:.2f}%"
+    return {"recommendation_header":recommendation_header_str, "recommendation": recommendation_str}
