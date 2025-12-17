@@ -11,18 +11,13 @@ QFrame {
     color: #1a1a1a; /* Set color for the line */
 }
 
-#recommendation-separator {
-    border-left: 2px double #1a1a1a; /* Double line border on the left */
-    margin: 0 5px; /* Add some horizontal margin */
-}
-
 /* Masthead */
 #masthead {
     border-bottom: 4px double #1a1a1a;
     padding: 20px;
 }
 
-#masthead-subtitle {
+#meta-header QLabel {
     font-family: "Courier Prime", monospace;
     font-size: 10px;
     text-transform: uppercase;
@@ -37,6 +32,20 @@ QFrame {
     letter-spacing: -2px;
 }
 
+#sub-header-bar {
+    border-top: 2px solid #1a1a1a;
+    border-bottom: 2px solid #1a1a1a;
+    padding: 5px 0px;
+    margin-top: 5px;
+}
+
+#sub-header-bar QLabel {
+    font-family: "Lora", serif;
+    font-weight: bold;
+    font-size: 12px;
+    text-transform: uppercase;
+}
+
 /* Search Panel */
 #search-panel {
     border: 2px solid #1a1a1a;
@@ -49,11 +58,12 @@ QFrame {
     padding: 10px;
 }
 
-#search-panel QLineEdit {
+#search-panel QLineEdit, #search-panel QComboBox {
     background-color: white;
     color: black;
     border: 1px solid #1a1a1a;
     padding: 5px;
+    font-family: "Courier Prime", monospace;
 }
 
 #search-title {
@@ -62,8 +72,8 @@ QFrame {
     font-size: 16px;
     text-transform: uppercase;
     border-bottom: 2px solid #1a1a1a;
-    margin-bottom: 5px; /* Reduced margin */
-    padding: 1px 2px; /* 1px top/bottom, 2px left/right */
+    margin-bottom: 5px;
+    padding: 1px 2px;
 }
 
 /* Recommendation Panel */
@@ -75,20 +85,44 @@ QFrame {
 
 #recommendation-panel-inner {
     border: 1px solid #1a1a1a;
-    padding: 20px; /* Increased padding */
+    padding: 20px;
+}
+
+#verdict-badge {
+    background-color: #1a1a1a;
+    color: white;
+    padding: 2px 8px;
+    font-family: "Courier Prime", monospace;
+    font-size: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
 }
 
 #recommendation-header {
-    font-family: "Tangerine", cursive;
-    font-size: 56px; /* Enlarged font size */
-    color: black;
+    font-family: "Playfair Display", serif;
+    font-size: 32px;
+    font-weight: 900;
+    text-transform: uppercase;
+    margin: 10px 0;
 }
 
-#recommendation-label, #confidence-label {
-    font-family: "Playfair Display", serif; /* Aligned with search-title */
-    font-weight: bold; /* Aligned with search-title */
-    color: black; /* Default color */
-    font-size: 16px; /* Enlarged text */
+#recommendation-details {
+    font-family: "Lora", serif;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+.stat-label {
+    font-family: "Courier Prime", monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    color: #666666;
+}
+
+.stat-value {
+    font-family: "Playfair Display", serif;
+    font-size: 24px;
+    font-weight: bold;
 }
 
 /* Table */

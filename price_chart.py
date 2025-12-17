@@ -3,77 +3,65 @@ from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 import pandas as pd
 import matplotlib.dates as mdates
-
 import matplotlib.ticker as mticker
 
 class PriceChart(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.figure = Figure(figsize=(8, 6), dpi=100) # Increased figsize
+        # Use the paper color for the figure background
+        self.figure = Figure(figsize=(8, 6), dpi=100, facecolor='#fdfbf7')
         self.canvas = FigureCanvas(self.figure)
         layout = QVBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
         layout.addWidget(self.canvas)
         self.setLayout(layout)
         self.plot(pd.DataFrame()) # Initial empty plot
 
     def plot(self, df):
         self.figure.clear()
+        # Set facecolor again after clear
+        self.figure.set_facecolor('#fdfbf7')
         ax = self.figure.add_subplot(111)
-        ax.set_title("Price History")
-        ax.set_xlabel("Date")
-        ax.set_ylabel("Price (€)")
+        ax.set_facecolor('#fdfbf7')
+        
+        # Remove top and right spines for a cleaner look
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        ax.spines['left'].set_color('#1a1a1a')
+        ax.spines['bottom'].set_color('#1a1a1a')
 
         if not df.empty:
             df['date'] = pd.to_datetime(df['date'])
             df = df.sort_values(by='date')
             
-            # Color-code by supermarket
-            lines = []
-            for supermarket, group in df.groupby('supermarket'):
-                line, = ax.plot(group['date'], group['price'], marker='o', linestyle='-', label=supermarket)
-                lines.append(line)
+            # Use 'step' plot with 'post' (equivalent to stepAfter)
+            # Use ink-black for the line
+            ax.step(df['date'], df['price'], where='post', color='#1a1a1a', linewidth=2, marker='o', markersize=4, markerfacecolor='white', markeredgecolor='#1a1a1a')
             
-            # Set x-axis tick labels to show abbreviated weekday
-            ax.xaxis.set_major_formatter(mdates.DateFormatter('%a'))
-            ax.tick_params(axis='x', labelsize=8)
+            # Set x-axis tick labels
+            ax.xaxis.set_major_formatter(mdates.DateFormatter('%d/%m'))
+            ax.tick_params(axis='x', labelsize=8, colors='#1a1a1a')
+            ax.tick_params(axis='y', labelsize=8, colors='#1a1a1a')
             
             # Set y-axis interval
             ax.yaxis.set_major_locator(mticker.MultipleLocator(0.2))
             
-            self.figure.tight_layout(rect=[0, 0.15, 0.85, 0.95]) # Adjusted rect for more margin
-            
-            # Add legend at the bottom
-            self.figure.legend(lines, [l.get_label() for l in lines], loc='center left', bbox_to_anchor=(0.85, 0.5))
+            # Add grid lines (horizontal only, dashed)
+            ax.yaxis.grid(True, linestyle='--', alpha=0.3, color='#1a1a1a')
+            ax.xaxis.grid(False)
 
-            # Hover functionality
-            annot = ax.annotate("", xy=(0,0), xytext=(20,20),textcoords="offset points",
-                                bbox=dict(boxstyle="round", fc="w"),
-                                arrowprops=dict(arrowstyle="->"))
-            annot.set_visible(False)
-
-            def update_annot(event):
-                if event.inaxes == ax:
-                    for line in lines:
-                        cont, ind = line.contains(event)
-                        if cont:
-                            pos = line.get_xydata()[ind["ind"][0]]
-                            annot.xy = pos
-                            date_str = pd.to_datetime(pos[0], unit='D').strftime('%Y-%m-%d')
-                            annot.set_text(f"Date: {date_str}\nPrice: {pos[1]:.2f} €")
-                            annot.get_bbox_patch().set_alpha(0.4)
-                            annot.set_visible(True)
-                            self.canvas.draw_idle()
-                            return
-                if annot.get_visible():
-                    annot.set_visible(False)
-                    self.canvas.draw_idle()
-
-            self.canvas.mpl_connect("motion_notify_event", update_annot)
+            self.figure.tight_layout()
 
         else:
-            ax.text(0.5, 0.5, "No data to display",
+            ax.text(0.5, 0.5, "Awaiting data points...",
                     horizontalalignment='center',
                     verticalalignment='center',
-                    transform=ax.transAxes)
+                    transform=ax.transAxes,
+                    fontfamily='serif',
+                    fontstyle='italic',
+                    color='#666666')
+            
+            # Hide axes for empty state
+            ax.set_axis_off()
 
         self.canvas.draw()

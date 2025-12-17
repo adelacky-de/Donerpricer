@@ -1,5 +1,6 @@
 import os
 import sys
+from datetime import datetime
 from PySide6.QtWidgets import (
     QApplication,
     QMainWindow,
@@ -62,21 +63,38 @@ class MainWindow(QMainWindow):
         masthead = QWidget()
         masthead.setObjectName("masthead")
         masthead_layout = QVBoxLayout(masthead)
-        masthead_layout.setAlignment(Qt.AlignCenter)
+        masthead_layout.setContentsMargins(0, 0, 0, 0)
+        masthead_layout.setSpacing(0)
 
-        subtitle_layout = QHBoxLayout()
-        subtitle_layout.addWidget(QLabel("Vol. 01"))
-        subtitle_layout.addStretch()
-        subtitle_layout.addWidget(QLabel("Est. 2024"))
-        subtitle_layout.addStretch()
-        subtitle_layout.addWidget(QLabel("€ 0.50"))
+        # Meta Header (top bar)
+        meta_header = QWidget()
+        meta_header.setObjectName("meta-header")
+        meta_layout = QHBoxLayout(meta_header)
+        meta_layout.setContentsMargins(0, 0, 0, 5)
+        meta_layout.addWidget(QLabel("Vol. 01"))
+        meta_layout.addStretch()
+        meta_layout.addWidget(QLabel("Est. 2024"))
+        meta_layout.addStretch()
+        meta_layout.addWidget(QLabel("€ 0.50"))
+        masthead_layout.addWidget(meta_header)
         
         title = QLabel("The Dönerprice")
         title.setObjectName("masthead-title")
         title.setAlignment(Qt.AlignCenter)
-
-        masthead_layout.addLayout(subtitle_layout)
         masthead_layout.addWidget(title)
+
+        # Sub Header Bar (bottom bar with double line)
+        sub_header = QWidget()
+        sub_header.setObjectName("sub-header-bar")
+        sub_layout = QHBoxLayout(sub_header)
+        sub_layout.setContentsMargins(10, 5, 10, 5)
+        sub_layout.addWidget(QLabel("Grocery Intelligence"))
+        sub_layout.addStretch()
+        sub_layout.addWidget(QLabel(datetime.now().strftime("%A, %B %d, %Y")))
+        sub_layout.addStretch()
+        sub_layout.addWidget(QLabel("Berlin Edition"))
+        masthead_layout.addWidget(sub_header)
+
         main_layout.addWidget(masthead)
 
         # Add horizontal double line under masthead
@@ -127,29 +145,59 @@ class MainWindow(QMainWindow):
         # 2. Recommendation Panel
         recommendation_widget = QWidget()
         recommendation_widget.setObjectName("recommendation-panel")
-        recommendation_layout = QHBoxLayout(recommendation_widget) # Changed to QHBoxLayout
+        recommendation_layout = QVBoxLayout(recommendation_widget)
+        recommendation_layout.setContentsMargins(1, 1, 1, 1)
 
-        # Left side: Recommendation Header
-        header_container = QVBoxLayout()
-        self.recommendation_header = QLabel("Prediction:")
+        rec_content = QWidget()
+        rec_content.setObjectName("recommendation-panel-inner")
+        rec_content_layout = QVBoxLayout(rec_content)
+
+        verdict_badge_container = QHBoxLayout()
+        self.verdict_badge = QLabel("Official Verdict")
+        self.verdict_badge.setObjectName("verdict-badge")
+        verdict_badge_container.addWidget(self.verdict_badge, 0, Qt.AlignCenter)
+        rec_content_layout.addLayout(verdict_badge_container)
+
+        self.recommendation_header = QLabel("Awaiting Query")
         self.recommendation_header.setObjectName("recommendation-header")
-        header_container.addWidget(self.recommendation_header, alignment=Qt.AlignCenter) # Vertically center
-        recommendation_layout.addLayout(header_container, 3) # Set stretch factor to 3
+        self.recommendation_header.setAlignment(Qt.AlignCenter)
+        self.recommendation_header.setWordWrap(True)
+        rec_content_layout.addWidget(self.recommendation_header)
 
-        # Add a vertical double line separator (using QFrame)
-        separator = QFrame()
-        separator.setObjectName("recommendation-separator")
-        separator.setFrameShape(QFrame.VLine)
-        separator.setFixedWidth(4) # Set fixed width for the QFrame
-        recommendation_layout.addWidget(separator)
+        # Stats Grid
+        stats_widget = QWidget()
+        stats_layout = QGridLayout(stats_widget)
+        stats_layout.setContentsMargins(0, 10, 0, 10)
 
-        # Right side: Recommendation Label
-        details_container = QVBoxLayout()
-        self.recommendation_label = QLabel("Best day to buy: -\nBest Price: -\nConfidence: -")
-        self.recommendation_label.setObjectName("recommendation-label")
-        self.recommendation_label.setWordWrap(True)
-        details_container.addWidget(self.recommendation_label, alignment=Qt.AlignCenter) # Vertically center
-        recommendation_layout.addLayout(details_container, 7) # Set stretch factor to 7
+        price_label = QLabel("Forecasted Price")
+        price_label.setProperty("class", "stat-label")
+        self.price_value = QLabel("€ -")
+        self.price_value.setProperty("class", "stat-value")
+
+        day_label = QLabel("Target Day")
+        day_label.setProperty("class", "stat-label")
+        self.day_value = QLabel("-")
+        self.day_value.setProperty("class", "stat-value")
+
+        stats_layout.addWidget(price_label, 0, 0)
+        stats_layout.addWidget(self.price_value, 1, 0)
+        stats_layout.addWidget(day_label, 0, 1, Qt.AlignRight)
+        stats_layout.addWidget(self.day_value, 1, 1, Qt.AlignRight)
+
+        rec_content_layout.addWidget(stats_widget)
+
+        self.recommendation_details = QLabel("Search an item to read the report.")
+        self.recommendation_details.setObjectName("recommendation-details")
+        self.recommendation_details.setWordWrap(True)
+        rec_content_layout.addWidget(self.recommendation_details)
+
+        self.confidence_label = QLabel("Confidence Index: -")
+        self.confidence_label.setProperty("class", "stat-label")
+        self.confidence_label.setAlignment(Qt.AlignRight)
+        rec_content_layout.addWidget(self.confidence_label)
+
+        recommendation_layout.addWidget(rec_content)
+        main_layout.addWidget(recommendation_widget, 1)
         
         main_layout.addWidget(recommendation_widget, 1) # Give some stretch
 
@@ -184,8 +232,20 @@ class MainWindow(QMainWindow):
             self.current_df = df # Store DataFrame for sorting
             self.populate_table(df)
             ml_result = ml_model.get_recommendation(df) # Get dict result
-            self.recommendation_header.setText(ml_result["recommendation_header"])
-            self.recommendation_label.setText(ml_result["recommendation"])
+            
+            # Update Recommendation Panel
+            # Parse the recommendation string from ml_model.py
+            lines = ml_result["recommendation"].split("\n")
+            best_day = lines[0].split(": ")[1] if len(lines) > 0 else "-"
+            best_price = lines[1].split(": ")[1] if len(lines) > 1 else "-"
+            confidence = lines[2].split(": ")[1] if len(lines) > 2 else "-"
+            
+            self.recommendation_header.setText("BUY IT NOW!" if "Best day to buy" in ml_result["recommendation"] else "HOLD YOUR WALLET!")
+            self.day_value.setText(best_day)
+            self.price_value.setText(best_price)
+            self.confidence_label.setText(f"Confidence Index: {confidence}")
+            self.recommendation_details.setText(f"Market analysis suggests that {best_day} is the optimal time for acquisition.")
+            
             self.price_chart.plot(df)
 
     def populate_table(self, df):
