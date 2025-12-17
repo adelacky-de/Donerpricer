@@ -1,6 +1,7 @@
 import os
 import sys
 from datetime import datetime
+from datetime import datetime
 from PySide6.QtWidgets import (
     QApplication,
     QMainWindow,
@@ -79,9 +80,9 @@ class MainWindow(QMainWindow):
         masthead_layout.addWidget(meta_header)
         
         title = QLabel("The Dönerprice")
-        title.setObjectName("masthead-title")
-        title.setAlignment(Qt.AlignCenter)
-        masthead_layout.addWidget(title)
+        title_font = QFont("Noto Serif")
+        title_font.setWeight(QFont.Weight.Black)
+        title.setFont(title_font)
 
         # Sub Header Bar (bottom bar with double line)
         sub_header = QWidget()
@@ -90,9 +91,12 @@ class MainWindow(QMainWindow):
         sub_layout.setContentsMargins(10, 5, 10, 5)
         sub_layout.addWidget(QLabel("Grocery Intelligence"))
         sub_layout.addStretch()
-        sub_layout.addWidget(QLabel(datetime.now().strftime("%A, %B %d, %Y")))
+        date_label = QLabel(datetime.now().strftime("%A, %B %d, %Y"))
+        date_label.setFont(QFont("Noto Serif"))
         sub_layout.addStretch()
-        sub_layout.addWidget(QLabel("Berlin Edition"))
+        berlin_label = QLabel("Berlin Edition")
+        berlin_label.setFont(QFont("Noto Serif"))
+        sub_layout.addWidget(berlin_label)
         masthead_layout.addWidget(sub_header)
 
         main_layout.addWidget(masthead)
@@ -112,6 +116,9 @@ class MainWindow(QMainWindow):
         search_layout.setContentsMargins(10, 10, 10, 10) # Add some padding
         search_layout.setSpacing(15) # Adjust spacing to 15px
         search_title = QLabel("Search Archives")
+        search_font = QFont("Noto Serif")
+        search_font.setWeight(QFont.Weight.DemiBold)
+        search_title.setFont(search_font)
         search_title.setObjectName("search-title")
         search_layout.addWidget(search_title)
         
@@ -291,6 +298,7 @@ if __name__ == "__main__":
     font_dir = os.path.join(os.path.dirname(__file__), "fonts")
     QFontDatabase.addApplicationFont(os.path.join(font_dir, "Tangerine-Bold.ttf"))
     QFontDatabase.addApplicationFont(os.path.join(font_dir, "Tangerine-Regular.ttf"))
+    QFontDatabase.addApplicationFont(os.path.join(font_dir, "Noto_Serif.ttf"))
 
     # Load and apply stylesheet
     with open("style.qss", "r") as f:

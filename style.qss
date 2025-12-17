@@ -25,7 +25,7 @@ QFrame {
 }
 
 #masthead-title {
-    font-family: "Playfair Display", serif;
+    font-family: "Noto Serif", serif;
     font-size: 48px;
     font-weight: 900;
     text-transform: uppercase;
