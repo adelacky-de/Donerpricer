@@ -18,7 +18,7 @@ from PySide6.QtWidgets import (
     QScrollArea, # Added QScrollArea
 )
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QFontDatabase
+from PySide6.QtGui import QFont, QFontDatabase
 import database
 import ml_model
 from price_chart import PriceChart
@@ -120,15 +120,17 @@ class MainWindow(QMainWindow):
         recommendation_widget.setObjectName("recommendation-panel")
         recommendation_layout = QVBoxLayout(recommendation_widget)
 
-        self.recommendation_header = QLabel("Recommendation:")
+        self.recommendation_header = QLabel("Prediction:")
         self.recommendation_header.setObjectName("recommendation-header")
         recommendation_layout.addWidget(self.recommendation_header)
 
-        self.recommendation_label = QLabel("Perform a search to get a recommendation.")
+        self.recommendation_label = QLabel("Best day to buy: -\nBest Price: -\nConfidence: -")
+        self.recommendation_label.setObjectName("recommendation-label")
         self.recommendation_label.setWordWrap(True)
         recommendation_layout.addWidget(self.recommendation_label)
 
         self.confidence_label = QLabel("Confidence: N/A")
+        self.confidence_label.setObjectName("confidence-label")
         recommendation_layout.addWidget(self.confidence_label)
         main_layout.addWidget(recommendation_widget, 1) # Give some stretch
 
@@ -204,6 +206,11 @@ class MainWindow(QMainWindow):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
+
+    # Load custom fonts
+    font_dir = os.path.join(os.path.dirname(__file__), "fonts")
+    QFontDatabase.addApplicationFont(os.path.join(font_dir, "Tangerine-Bold.ttf"))
+    QFontDatabase.addApplicationFont(os.path.join(font_dir, "Tangerine-Regular.ttf"))
 
     # Load and apply stylesheet
     with open("style.qss", "r") as f:

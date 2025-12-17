@@ -62,13 +62,16 @@ def get_recommendation(df):
             df[col] = 0
     
     # Filter features to only include those present in the DataFrame
-    X = df[features]
+    X = df[features].copy()
     y = df['price']
 
-    print("df dtypes before tensor conversion:")
-    print(df.dtypes)
-    print("X dtypes before tensor conversion:")
-    print(X.dtypes)
+    # Convert boolean columns to integers (0 or 1)
+    for col in X.columns:
+        if X[col].dtype == 'bool':
+            X[col] = X[col].astype(int)
+
+    # Ensure all columns are numeric (float32) and handle any remaining non-numeric data
+    X = X.apply(pd.to_numeric, errors='coerce').fillna(0).astype(np.float32)
 
     # Convert to PyTorch tensors
     X_tensor = torch.tensor(X.values, dtype=torch.float32)
@@ -119,6 +122,9 @@ def get_recommendation(df):
             future_features_df[col] = 0
     future_features_df = future_features_df[X.columns] # Ensure order is the same
 
+    # Ensure all columns in future_features_df are numeric (float32)
+    future_features_df = future_features_df.apply(pd.to_numeric, errors='coerce').fillna(0).astype(np.float32)
+
     # Convert future features to PyTorch tensor and make predictions
     future_features_tensor = torch.tensor(future_features_df.values, dtype=torch.float32)
     model.eval() # Set model to evaluation mode
@@ -140,6 +146,7 @@ def get_recommendation(df):
     else:
         confidence = max(0, min(100, int(100 - (df['price_volatility'].mean() * 50)))) # Scale volatility to confidence
     recommendation_header_str = "Prediction"
+    recommendation_str = ""
     recommendation_str += f"Best day to buy: {best_day}\n"
     recommendation_str += f"Best Price: {predicted_price:.2f} €"
     recommendation_str += f"Confidence: {confidence:.2f}%"

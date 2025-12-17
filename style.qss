@@ -67,8 +67,15 @@ QWidget {
     padding: 10px;
 }
 
-#recommendation-panel QLabel {
-    color: red;
+#recommendation-header {
+    font-family: "Tangerine", cursive;
+    font-size: 24px;
+    color: black;
+}
+
+#recommendation-label, #confidence-label {
+    font-family: "Tangerine", cursive;
+    color: black;
 }
 
 /* Table */
