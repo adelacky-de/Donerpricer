@@ -227,7 +227,7 @@ class MainWindow(QMainWindow):
         search_font = QFont("Noto Serif")
         search_font.setWeight(QFont.Weight.DemiBold)
         search_title.setFont(search_font)
-        search_title.setObjectName("search-title")
+        search_title.setProperty("class", "panel-title")
         search_title_layout.addWidget(search_title)
         search_inner_layout.addWidget(search_title_container)
         
