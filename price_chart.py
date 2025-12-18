@@ -79,22 +79,69 @@ class PriceChart(QWidget):
         if event.inaxes == self.ax and not self.df.empty:
             cont, ind = self.line.contains(event)
             if cont:
-                # Get the index of the hovered point
                 data_index = ind['ind'][0]
                 
-                # Get data for the hovered point
                 date = self.df['date'].iloc[data_index]
                 price = self.df['price'].iloc[data_index]
                 supermarket = self.df['supermarket'].iloc[data_index]
 
+                # Determine annotation position dynamically
+                xdata = mdates.date2num(date)
+                ydata = price
+                
+                # Default text offset and alignment
+                x_offset, y_offset = 20, 20
+                ha = 'left'
+                va = 'bottom'
+
+                # Convert data coordinates to display coordinates
+                display_x, display_y = self.ax.transData.transform((xdata, ydata))
+                
+                # Get figure and axes dimensions
+                fig_width, fig_height = self.figure.get_size_inches() * self.figure.dpi
+                ax_x, ax_y, ax_width, ax_height = self.ax.get_position().bounds
+                
+                # Calculate annotation box dimensions (approximate)
+                # This is a rough estimate, actual size depends on text content and font
+                text_width_estimate = 100 # pixels
+                text_height_estimate = 30 # pixels
+
+                # Check if annotation goes out of right boundary
+                if display_x + x_offset + text_width_estimate > fig_width * (ax_x + ax_width):
+                    ha = 'right'
+                    x_offset = -20
+                
+                # Check if annotation goes out of left boundary
+                if display_x + x_offset - text_width_estimate < fig_width * ax_x:
+                    ha = 'left'
+                    x_offset = 20
+
+                # Check if annotation goes out of top boundary
+                if display_y + y_offset + text_height_estimate > fig_height * (ax_y + ax_height):
+                    va = 'top'
+                    y_offset = -20
+                
+                # Check if annotation goes out of bottom boundary
+                if display_y + y_offset - text_height_estimate < fig_height * ax_y:
+                    va = 'bottom'
+                    y_offset = 20
+
+
                 # Update annotation text and position
                 if self.annot is None:
-                    self.annot = self.ax.annotate("", xy=(0,0), xytext=(20,20),
+                    self.annot = self.ax.annotate("", xy=(xdata, ydata), xytext=(x_offset, y_offset),
                                                 textcoords="offset points",
-                                                bbox=dict(boxstyle="round,pad=0.5", fc="yellow", ec="k", lw=1, alpha=0.8),
-                                                arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=0"))
+                                                bbox=dict(boxstyle="round,pad=0.5", fc="white", ec="k", lw=1, alpha=0.8),
+                                                arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=0"),
+                                                ha=ha, va=va)
+                else:
+                    self.annot.xy = (xdata, ydata)
+                    self.annot.set_text(f"Price: {price:.2f}€\nSupermarket: {supermarket}")
+                    self.annot.set_bbox(dict(boxstyle="round,pad=0.5", fc="white", ec="k", lw=1, alpha=0.8))
+                    self.annot.set_position((x_offset, y_offset))
+                    self.annot.set_ha(ha)
+                    self.annot.set_va(va)
                 
-                self.annot.xy = (mdates.date2num(date), price)
                 text = f"Price: {price:.2f}€\nSupermarket: {supermarket}"
                 self.annot.set_text(text)
                 self.annot.set_visible(True)
