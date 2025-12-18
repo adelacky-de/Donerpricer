@@ -360,6 +360,7 @@ class MainWindow(QMainWindow):
         chart_inner = QWidget()
         chart_inner.setObjectName("chart-panel-inner")
         chart_inner_layout = QVBoxLayout(chart_inner)
+        chart_inner_layout.setSpacing(2)
         
         chart_title = QLabel("Market Fluctuations")
         chart_title.setProperty("class", "panel-title")
