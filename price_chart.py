@@ -90,60 +90,65 @@ class PriceChart(QWidget):
                 ydata = price
                 
                 # Default text offset and alignment
-                x_offset, y_offset = 20, 20
+                x_offset, y_offset = 10, 10 # Reduced initial offset
                 ha = 'left'
                 va = 'bottom'
 
-                # Convert data coordinates to display coordinates
-                display_x, display_y = self.ax.transData.transform((xdata, ydata))
-                
-                # Get figure and axes dimensions
-                fig_width, fig_height = self.figure.get_size_inches() * self.figure.dpi
-                ax_x, ax_y, ax_width, ax_height = self.ax.get_position().bounds
-                
-                # Calculate annotation box dimensions (approximate)
-                # This is a rough estimate, actual size depends on text content and font
-                text_width_estimate = 100 # pixels
-                text_height_estimate = 30 # pixels
+                text = f"Price: {price:.2f}€\nSupermarket: {supermarket}"
 
-                # Check if annotation goes out of right boundary
-                if display_x + x_offset + text_width_estimate > fig_width * (ax_x + ax_width):
-                    ha = 'right'
-                    x_offset = -20
-                
-                # Check if annotation goes out of left boundary
-                if display_x + x_offset - text_width_estimate < fig_width * ax_x:
-                    ha = 'left'
-                    x_offset = 20
-
-                # Check if annotation goes out of top boundary
-                if display_y + y_offset + text_height_estimate > fig_height * (ax_y + ax_height):
-                    va = 'top'
-                    y_offset = -20
-                
-                # Check if annotation goes out of bottom boundary
-                if display_y + y_offset - text_height_estimate < fig_height * ax_y:
-                    va = 'bottom'
-                    y_offset = 20
-
-
-                # Update annotation text and position
                 if self.annot is None:
-                    self.annot = self.ax.annotate("", xy=(xdata, ydata), xytext=(x_offset, y_offset),
+                    self.annot = self.ax.annotate(text, xy=(xdata, ydata), xytext=(x_offset, y_offset),
                                                 textcoords="offset points",
-                                                bbox=dict(boxstyle="round,pad=0.5", fc="white", ec="k", lw=1, alpha=0.8),
+                                                bbox=dict(boxstyle="round,pad=0.5", fc="white", ec="k", lw=1, alpha=0.7), # Changed alpha
                                                 arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=0"),
-                                                ha=ha, va=va)
+                                                ha=ha, va=va, fontsize=8, color='#1a1a1a') # Added fontsize and color
                 else:
                     self.annot.xy = (xdata, ydata)
-                    self.annot.set_text(f"Price: {price:.2f}€\nSupermarket: {supermarket}")
-                    self.annot.set_bbox(dict(boxstyle="round,pad=0.5", fc="white", ec="k", lw=1, alpha=0.8))
-                    self.annot.set_position((x_offset, y_offset))
-                    self.annot.set_ha(ha)
-                    self.annot.set_va(va)
+                    self.annot.set_text(text)
+                    self.annot.set_bbox(dict(boxstyle="round,pad=0.5", fc="white", ec="k", lw=1, alpha=0.7)) # Changed alpha
+                    self.annot.set_fontsize(8) # Set fontsize
+                    self.annot.set_color('#1a1a1a') # Set color
+
+                # Get the renderer to calculate text extent
+                renderer = self.canvas.get_renderer()
+                self.annot.set_visible(True) # Temporarily make visible to get extent
+                self.canvas.draw() # Draw to update extent
+                bbox_ann = self.annot.get_window_extent(renderer)
+                bbox_ax = self.ax.bbox
+
+                # Check for overlap and adjust position
+                # 10% overlap threshold
+                overlap_threshold_x = bbox_ann.width * 0.1
+                overlap_threshold_y = bbox_ann.height * 0.1
+
+                # Check right boundary
+                if bbox_ann.x1 > bbox_ax.x1 - overlap_threshold_x:
+                    ha = 'right'
+                    x_offset = -10 # Adjust offset for right alignment
+                # Check left boundary
+                elif bbox_ann.x0 < bbox_ax.x0 + overlap_threshold_x:
+                    ha = 'left'
+                    x_offset = 10 # Adjust offset for left alignment
+                else:
+                    ha = 'left'
+                    x_offset = 10
+
+                # Check top boundary
+                if bbox_ann.y1 > bbox_ax.y1 - overlap_threshold_y:
+                    va = 'top'
+                    y_offset = -10 # Adjust offset for top alignment
+                # Check bottom boundary
+                elif bbox_ann.y0 < bbox_ax.y0 + overlap_threshold_y:
+                    va = 'bottom'
+                    y_offset = 10 # Adjust offset for bottom alignment
+                else:
+                    va = 'bottom'
+                    y_offset = 10
+
+                self.annot.set_position((x_offset, y_offset))
+                self.annot.set_ha(ha)
+                self.annot.set_va(va)
                 
-                text = f"Price: {price:.2f}€\nSupermarket: {supermarket}"
-                self.annot.set_text(text)
                 self.annot.set_visible(True)
                 self.canvas.draw_idle()
             else:

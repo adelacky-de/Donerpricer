@@ -362,10 +362,16 @@ class MainWindow(QMainWindow):
         chart_inner_layout = QVBoxLayout(chart_inner)
         chart_inner_layout.setSpacing(2)
         
+        chart_title_container = QWidget()
+        chart_title_container.setStyleSheet("margin-top: 5px; padding: 0px;")
+        chart_title_layout = QVBoxLayout(chart_title_container)
+        chart_title_layout.setContentsMargins(0, 0, 0, 0)
+
         chart_title = QLabel("Market Fluctuations")
         chart_title.setProperty("class", "panel-title")
         chart_title.setAlignment(Qt.AlignCenter)
-        chart_inner_layout.addWidget(chart_title)
+        chart_title_layout.addWidget(chart_title)
+        chart_inner_layout.addWidget(chart_title_container)
         
         chart_subtitle = QLabel("Price History Analysis")
         chart_subtitle.setProperty("class", "panel-subtitle")
