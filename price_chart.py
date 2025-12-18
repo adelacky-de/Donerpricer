@@ -42,8 +42,8 @@ class PriceChart(QWidget):
             
             # Set x-axis tick labels
             ax.xaxis.set_major_formatter(mdates.DateFormatter('%d/%m'))
-            ax.tick_params(axis='x', labelsize=8, colors='#1a1a1a', family='Courier Prime')
-            ax.tick_params(axis='y', labelsize=8, colors='#1a1a1a', family='Courier Prime')
+            ax.tick_params(axis='x', labelsize=8, colors='#1a1a1a', labelfontfamily='Noto Serif')
+            ax.tick_params(axis='y', labelsize=8, colors='#1a1a1a', labelfontfamily='Noto Serif')
             
             # Set y-axis interval
             ax.yaxis.set_major_locator(mticker.MultipleLocator(0.2))

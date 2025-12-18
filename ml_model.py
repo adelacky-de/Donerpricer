@@ -28,6 +28,10 @@ def get_recommendation(df):
     Generates a recommendation based on historical price data using a simple linear regression model.
     Returns a dictionary with recommendation string and confidence score.
     """
+    # Set random seeds for reproducibility
+    np.random.seed(42)
+    torch.manual_seed(42)
+
     if len(df) < 2:
         return {"recommendation": "Not enough data for a recommendation.", "confidence": 0}
 
