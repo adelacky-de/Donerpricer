@@ -146,7 +146,7 @@ class MainWindow(QMainWindow):
 
         main_layout = QVBoxLayout(central_content_widget) # Layout for the scrollable content
         main_layout.setContentsMargins(10, 10, 10, 10) # Add some padding
-        main_layout.setSpacing(10) # Adjust spacing
+        main_layout.setSpacing(5) # Adjust spacing
 
         # --- Masthead ---
         masthead = QWidget()
@@ -216,10 +216,10 @@ class MainWindow(QMainWindow):
         search_inner.setObjectName("search-panel-inner")
         search_inner_layout = QVBoxLayout(search_inner)
         search_inner_layout.setContentsMargins(15, 15, 15, 15)
-        search_inner_layout.setSpacing(10)
+        search_inner_layout.setSpacing(5)
         
         search_title_container = QWidget()
-        search_title_container.setStyleSheet("margin-top: 10px; padding: 0px;")
+        search_title_container.setStyleSheet("margin-top: 5px; padding: 0px;")
         search_title_layout = QVBoxLayout(search_title_container)
         search_title_layout.setContentsMargins(0, 0, 0, 0)
         
@@ -273,8 +273,8 @@ class MainWindow(QMainWindow):
         recommendation_inner = QWidget()
         recommendation_inner.setObjectName("recommendation-panel-inner")
         recommendation_inner_layout = QVBoxLayout(recommendation_inner)
-        recommendation_inner_layout.setContentsMargins(10, 10, 10, 10)
-        recommendation_inner_layout.setSpacing(5)
+        recommendation_inner_layout.setContentsMargins(5, 5, 5, 5)
+        recommendation_inner_layout.setSpacing(2)
 
         verdict_badge_container = QHBoxLayout()
         self.verdict_badge = QLabel("Prediction")
@@ -291,17 +291,19 @@ class MainWindow(QMainWindow):
         # Stats Grid
         stats_widget = QWidget()
         stats_layout = QGridLayout(stats_widget)
-        stats_layout.setContentsMargins(0, 10, 0, 10)
+        stats_layout.setContentsMargins(0, 5, 0, 5)
 
         price_label = QLabel("Forecasted Price")
         price_label.setProperty("class", "stat-label")
         self.price_value = QLabel("€ -")
         self.price_value.setProperty("class", "stat-value")
+        self.price_value.setProperty("class", "prediction-value")
 
         day_label = QLabel("Target Day")
         day_label.setProperty("class", "stat-label")
         self.day_value = QLabel("-")
         self.day_value.setProperty("class", "stat-value")
+        self.day_value.setProperty("class", "prediction-value")
 
         stats_layout.addWidget(price_label, 0, 0, Qt.AlignCenter)
         stats_layout.addWidget(self.price_value, 1, 0, Qt.AlignCenter)
@@ -424,18 +426,25 @@ class MainWindow(QMainWindow):
             lines = ml_result["recommendation"].split("\n")
             best_day = lines[0].split(": ")[1] if len(lines) > 0 else "-"
             best_price = lines[1].split(": ")[1] if len(lines) > 1 else "-"
-            confidence = lines[2].split(": ")[1] if len(lines) > 2 else "-"
+            confidence = float(lines[2].split(": ")[1].replace('%', '')) if len(lines) > 2 else 0.0
             
             # Only "BUY IT NOW!" if the best day is today
             today_name = datetime.now().strftime("%A")
-            if best_day == today_name:
-                self.recommendation_header.setText("BUY IT NOW!")
+            
+            if confidence < 90.0:
+                self.recommendation_header.setText("Confidence too low for a reliable recommendation.")
+                self.day_value.setText("-")
+                self.price_value.setText("€ -")
+                self.confidence_label.setText(f"Confidence Index: {confidence:.2f}%")
             else:
-                self.recommendation_header.setText("HOLD YOUR WALLET!")
-                
-            self.day_value.setText(best_day)
-            self.price_value.setText(best_price)
-            self.confidence_label.setText(f"Confidence Index: {confidence}")
+                if best_day == today_name:
+                    self.recommendation_header.setText("BUY IT NOW!")
+                else:
+                    self.recommendation_header.setText("HOLD YOUR WALLET!")
+                    
+                self.day_value.setText(best_day)
+                self.price_value.setText(best_price)
+                self.confidence_label.setText(f"Confidence Index: {confidence:.2f}%")
             
             self.price_chart.plot(df)
             self.vintage_map.update_map(df)

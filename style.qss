@@ -69,16 +69,20 @@ QFrame {
 .panel-title {
     font-family: "Noto Serif", serif;
     font-weight: bold;
-    font-size: 20px;
+    font-size: 18px;
     text-transform: uppercase;
     border-bottom: 2px solid #1a1a1a;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
     text-align: center;
 }
 
 .panel-subtitle {
     font-family: "Noto Serif", serif;
     color: #888888; /* Grey color */
+}
+
+.prediction-value {
+    color: red;
 }
 
 /* Recommendation Panel */
