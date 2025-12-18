@@ -27,7 +27,8 @@ class PriceChart(QWidget):
     def plot(self, df):
         print(f"PriceChart.plot called with {len(df)} records")
         self.df = df # Store the dataframe
-        self.ax.clear() # Clear the stored ax
+        self.figure.clear() # Clear the figure
+        self.ax = self.figure.add_subplot(111) # Re-assign ax after clearing the figure
         # Set facecolor again after clear
         self.figure.set_facecolor('#fdfbf7')
         self.ax.set_facecolor('#fdfbf7')

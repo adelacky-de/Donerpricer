@@ -167,6 +167,13 @@ class MainWindow(QMainWindow):
         meta_layout.addWidget(QLabel("€ 0.50"))
         masthead_layout.addWidget(meta_header)
         
+        # Separator line
+        separator_line = QFrame()
+        separator_line.setFrameShape(QFrame.HLine)
+        separator_line.setFrameShadow(QFrame.Sunken)
+        separator_line.setLineWidth(2)
+        masthead_layout.addWidget(separator_line)
+        
         title = QLabel("The Dönerprice")
         title_font = QFont("Noto Serif")
         title_font.setPixelSize(68)
@@ -219,7 +226,6 @@ class MainWindow(QMainWindow):
         search_inner_layout.setSpacing(5)
         
         search_title_container = QWidget()
-        search_title_container.setStyleSheet("margin-top: 5px; padding: 0px;")
         search_title_layout = QVBoxLayout(search_title_container)
         search_title_layout.setContentsMargins(0, 0, 0, 0)
         
@@ -363,7 +369,7 @@ class MainWindow(QMainWindow):
         chart_inner_layout.setSpacing(2)
         
         chart_title_container = QWidget()
-        chart_title_container.setStyleSheet("margin-top: 5px; padding: 0px;")
+        chart_title_container.setStyleSheet("margin-top: 5px; margin-bottom: 5px; padding: 0px;") # Modified line
         chart_title_layout = QVBoxLayout(chart_title_container)
         chart_title_layout.setContentsMargins(0, 0, 0, 0)
 
@@ -380,7 +386,7 @@ class MainWindow(QMainWindow):
 
         self.price_chart = PriceChart()
         self.price_chart.setObjectName("chart-panel")
-        self.price_chart.setMinimumHeight(250)
+        self.price_chart.setMinimumHeight(200) # Modified line
         chart_inner_layout.addWidget(self.price_chart)
         
         chart_panel_layout.addWidget(chart_inner)
