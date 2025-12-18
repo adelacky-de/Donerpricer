@@ -208,12 +208,12 @@ class MainWindow(QMainWindow):
         # --- Main Content (Vertical Stack) ---
         # 1. Search Bar
         search_panel = QWidget()
-        search_panel.setProperty("class", "vintage-panel")
+        search_panel.setObjectName("search-panel")
         search_panel_layout = QVBoxLayout(search_panel)
         search_panel_layout.setContentsMargins(15, 15, 15, 15)
         
         search_inner = QWidget()
-        search_inner.setProperty("class", "vintage-panel-inner")
+        search_inner.setObjectName("search-panel-inner")
         search_inner_layout = QVBoxLayout(search_inner)
         search_inner_layout.setContentsMargins(15, 15, 15, 15)
         search_inner_layout.setSpacing(10)
@@ -266,12 +266,12 @@ class MainWindow(QMainWindow):
 
         # 2. Recommendation Panel
         recommendation_panel = QWidget()
-        recommendation_panel.setProperty("class", "vintage-panel")
+        recommendation_panel.setObjectName("recommendation-panel")
         recommendation_panel_layout = QVBoxLayout(recommendation_panel)
         recommendation_panel_layout.setContentsMargins(15, 15, 15, 15)
         
         recommendation_inner = QWidget()
-        recommendation_inner.setProperty("class", "vintage-panel-inner")
+        recommendation_inner.setObjectName("recommendation-panel-inner")
         recommendation_inner_layout = QVBoxLayout(recommendation_inner)
         recommendation_inner_layout.setContentsMargins(10, 10, 10, 10)
         recommendation_inner_layout.setSpacing(5)
@@ -318,12 +318,12 @@ class MainWindow(QMainWindow):
         main_layout.addWidget(recommendation_panel, 0)
 
         table_panel = QWidget()
-        table_panel.setProperty("class", "vintage-panel")
+        table_panel.setObjectName("table-panel")
         table_panel_layout = QVBoxLayout(table_panel)
         table_panel_layout.setContentsMargins(15, 15, 15, 15)
         
         table_inner = QWidget()
-        table_inner.setProperty("class", "vintage-panel-inner")
+        table_inner.setObjectName("table-panel-inner")
         table_inner_layout = QVBoxLayout(table_inner)
         
         table_header_layout = QHBoxLayout()
@@ -351,12 +351,12 @@ class MainWindow(QMainWindow):
 
         # 4. Historical Chart
         chart_panel = QWidget()
-        chart_panel.setProperty("class", "vintage-panel")
+        chart_panel.setObjectName("chart-panel")
         chart_panel_layout = QVBoxLayout(chart_panel)
         chart_panel_layout.setContentsMargins(15, 15, 15, 15)
         
         chart_inner = QWidget()
-        chart_inner.setProperty("class", "vintage-panel-inner")
+        chart_inner.setObjectName("chart-panel-inner")
         chart_inner_layout = QVBoxLayout(chart_inner)
         
         chart_title = QLabel("Market Fluctuations")
@@ -379,12 +379,12 @@ class MainWindow(QMainWindow):
 
         # 5. Vintage Map
         map_panel = QWidget()
-        map_panel.setProperty("class", "vintage-panel")
+        map_panel.setObjectName("map-panel")
         map_panel_layout = QVBoxLayout(map_panel)
         map_panel_layout.setContentsMargins(15, 15, 15, 15)
         
         map_inner = QWidget()
-        map_inner.setProperty("class", "vintage-panel-inner")
+        map_inner.setObjectName("map-panel-inner")
         map_inner_layout = QVBoxLayout(map_inner)
         
         map_title = QLabel("Geographic Distribution")
