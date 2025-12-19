@@ -27,7 +27,7 @@ QFrame {
 
 #masthead-title {
     font-family: "Noto Serif", serif;
-    font-size: 48px;
+    font-size: 68px;
     font-weight: 900;
     text-transform: uppercase;
     letter-spacing: -2px;
@@ -41,7 +41,7 @@ QFrame {
 }
 
 #sub-header-bar QLabel {
-    font-family: "Lora", serif;
+    font-family: "Noto Serif", serif;
     font-weight: bold;
     font-size: 12px;
     text-transform: uppercase;
@@ -65,6 +65,13 @@ QFrame {
     border: 1px solid #1a1a1a;
     padding: 5px;
     font-family: "Courier Prime", monospace;
+    min-width: 500px;
+    max-width: 500px;
+}
+
+#search-button {
+    min-width: 300px;
+    max-width: 300px;
 }
 
 .panel-title {
@@ -151,6 +158,7 @@ QTableWidget {
     background-color: white;
     font-family: "Courier Prime", monospace;
     font-size: 12px;
+    min-height: 200px;
 }
 QHeaderView::section {
     background-color: #f0f0f0;
@@ -169,6 +177,10 @@ QHeaderView::section {
 #chart-panel-inner {
     border: 1px solid #1a1a1a;
     padding: 10px;
+}
+
+PriceChart {
+    min-height: 200px;
 }
 
 QComboBox QAbstractItemView {

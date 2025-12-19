@@ -5,6 +5,14 @@ import json
 import pandas as pd # Import pandas for DataFrame type hinting
 
 class VintageMap(QWidget):
+    # Geocoding mapping for Münster supermarkets
+    # Format: (supermarket, location) -> (latitude, longitude)
+    GEOCODING_MAP = {
+        ("REWE", "Münster Center"): (51.967, 7.633),
+        ("Lidl", "Münster Süd"): (51.942, 7.625),
+        ("Aldi", "Münster Nord"): (51.985, 7.615),
+    }
+    
     def __init__(self, parent=None):
         super().__init__(parent)
         
@@ -89,20 +97,14 @@ class VintageMap(QWidget):
         self.setMinimumHeight(300)
 
     def update_map(self, df: pd.DataFrame):
+        """Update map with markers from DataFrame using class-level geocoding data."""
         print(f"VintageMap.update_map called with {len(df)} records")
-        
-        # Geocoding mapping for Münster
-        geo_map = {
-            ("REWE", "Münster Center"): (51.967, 7.633),
-            ("Lidl", "Münster Süd"): (51.942, 7.625),
-            ("Aldi", "Münster Nord"): (51.985, 7.615)
-        }
         
         data = []
         for _, row in df.iterrows():
             key = (row['supermarket'], row['location'])
-            if key in geo_map:
-                lat, lng = geo_map[key]
+            if key in self.GEOCODING_MAP:
+                lat, lng = self.GEOCODING_MAP[key]
                 data.append({
                     'lat': lat,
                     'lng': lng,

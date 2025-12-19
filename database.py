@@ -1,5 +1,18 @@
+import os
 import pandas as pd
-from supabase_client import supabase
+from supabase import create_client, Client
+from dotenv import load_dotenv
+
+# Initialize Supabase client
+load_dotenv()
+
+url: str = os.environ.get("SUPABASE_URL")
+key: str = os.environ.get("SUPABASE_KEY")
+
+if not url or not key:
+    raise ValueError("Supabase URL and Key must be set in the .env file.")
+
+supabase: Client = create_client(url, key)
 
 def create_receipts_table():
     """

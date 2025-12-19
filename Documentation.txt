@@ -1,89 +1,254 @@
-This grocery‑price tracker is a solid project idea and easier to finish than the UAV tool, while still letting you use all the libs you want.
+The Dönerpricer - Grocery Price Tracker & Predictor
+=====================================================
 
-## Feasibility as course project
+This grocery price tracker is a stand-alone Python application with a vintage newspaper-themed UI that helps users track grocery prices and predict optimal buying days using machine learning.
 
-- It fits the course: stand‑alone Python app, clear GUI, data I/O (receipts in, predictions and charts out), and an ML component to suggest buy date/price.
-- Scope is controllable: you can restrict to a few items (coffee, milk, noodles) and 1–2 months of data, and still show meaningful time‑series trends and recommendations.
+## Project Overview
 
-## How to use all the libraries
+The Dönerpricer is a comprehensive price tracking system that:
+- Stores historical grocery purchase data in Supabase (cloud PostgreSQL database)
+- Analyzes price trends using Ridge Regression machine learning
+- Predicts the best day to buy products at optimal prices
+- Visualizes price history and geographic distribution of purchases
+- Features a distinctive vintage newspaper aesthetic
 
-- **Pandas / NumPy / SQL / Spark**:  
-  - Parse uploaded receipt CSVs (or manually entered records) into a DataFrame with columns: `item_name, date, price, supermarket, location`.  
-  - Store the cleaned data in SQLite; optional Spark job to aggregate by week or weekday pattern (e.g. average price per weekday).  
-  - Use NumPy for feature engineering: rolling averages, price volatility, min/median/max per weekday.
+## Feasibility as Course Project
 
-- **PyTorch (ML model)**:  
-  - Build a tiny model (or even simple linear baseline first) that learns a mapping from features like `weekday, days_to_salary, store_id, month` to expected price or discount probability.  
-  - Given today’s date and item, the model predicts expected price for each upcoming day in the next week; you choose the day with lowest predicted price as the “suggested buying day” and show predicted price.
+- **Fits course requirements**: Stand-alone Python app with clear GUI, data I/O (database integration), time-series visualization, and ML component for price prediction
+- **Manageable scope**: Can track any number of items with historical data, showing meaningful trends and recommendations
+- **Library integration**: Successfully uses Pandas, NumPy, scikit-learn, PySide6, Matplotlib, Leaflet maps, and Supabase
 
-- **OpenCV or Pillow**:  
-  - For receipt upload, allow image receipts: use OpenCV/Pillow for basic preprocessing (grayscale, thresholding, crop) and either a simple OCR pipeline or manual “assist” (first version can just accept CSV, but showing you can load and display the receipt image already demonstrates the library).  
-  - Also generate the chart image: if you don’t use matplotlib directly, you can draw a simple bar chart using Pillow/OpenCV and then display it in the right‑bottom pane.
+## Architecture & Tech Stack
 
-## UI layout
+### Core Technologies
+- **GUI Framework**: PySide6 (Qt for Python)
+- **Database**: Supabase (PostgreSQL) with Python SDK
+- **Data Processing**: Pandas, NumPy
+- **Machine Learning**: scikit-learn (Ridge Regression with cross-validation)
+- **Visualization**: Matplotlib (embedded charts), Leaflet.js (interactive maps)
+- **Styling**: QSS (Qt Style Sheets) for centralized design
 
-The application's UI is structured as a single vertical layout, with the following panels stacked on top of each other:
+### File Structure
+```
+Dönerpricer/
+├── main.py              # Main application window and UI layout
+├── database.py          # Supabase client & data operations (merged from supabase_client.py)
+├── ml_model.py          # Ridge Regression prediction model
+├── price_chart.py       # Matplotlib price history chart
+├── map.py               # Leaflet-based interactive location map
+├── style.qss            # Centralized styling (vintage newspaper theme)
+├── fonts/               # Custom fonts (Noto Serif, Courier Prime, Playfair Display)
+└── .env                 # Environment variables (Supabase credentials)
+```
 
-- **Masthead**: Displays the application title and other meta information in a newspaper-style header.
+## UI Design - Vintage Newspaper Theme
 
-- **Search Panel**: Allows users to search for products by name and brand. It includes a search button to trigger the search.
+The application features a distinctive vintage newspaper aesthetic inspired by early 20th-century print media:
 
-- **Recommendation Panel**: Shows the ML model's recommendation for the best day to buy the selected product, along with the predicted price and a confidence score.
+### Design Elements
+- **Typography**: 
+  - Headlines: Noto Serif (bold, uppercase, large)
+  - Body text: Lora serif font
+  - Data displays: Courier Prime monospace
+  - Special accents: Playfair Display for predictions
+  
+- **Color Scheme**:
+  - Paper: #fdfbf7 (warm off-white)
+  - Ink: #1a1a1a (deep black)
+  - Monochrome map tiles with sepia filter
+  
+- **Layout Elements**:
+  - Double-line borders (newspaper column separators)
+  - Ornamental headers and badges
+  - Structured panels mimicking newspaper sections
 
-- **Table Panel**: Displays the historical price data for the selected product in a sortable table.
+### UI Structure (Vertical Stack Layout)
 
-- **Historical Chart**: A line chart that visualizes the price history of the selected product over time.
+1. **Masthead** (Newspaper Header)
+   - Application title: "The Dönerprice"
+   - Meta information: Volume, Edition, Price
+   - Current date and location
+   - Double-line separator borders
 
-- **Geographic Distribution Map**: A map that shows the locations of the supermarkets where the product has been purchased.
+2. **Search Panel** ("Search Archives")
+   - Product name dropdown (autocomplete, 500px width)
+   - Brand filter dropdown (optional, 500px width)
+   - Search button (300px width)
+   - Triggers all data updates on button click only
 
-## ML Model Reproducibility
+3. **Recommendation Panel** ("Prediction")
+   - Verdict badge: "Prediction" (newspaper-style label)
+   - Recommendation header: "BUY IT NOW!" or "HOLD YOUR WALLET!"
+   - Statistics grid:
+     * Forecasted Price
+     * Target Day (best day to buy)
+   - Confidence Index (displayed as percentage)
+   - Only shows recommendations with >90% confidence
 
-The machine learning model was initially producing different results on each run, even with the same input. This was because the model, a PyTorch neural network, was being re-initialized with random weights every time a prediction was requested.
+4. **Recent Transactions Table**
+   - Displays historical purchase data
+   - Columns: Date, Price, Avg Price/g, Supermarket, Location
+   - Record count displayed ("REC: X")
+   - Sortable by clicking column headers
+   - Minimum height: 200px
 
-To ensure that the model produces consistent and deterministic results, a fixed random seed has been set for both `numpy` and `torch` at the beginning of the prediction process. This guarantees that the model's "random" weight initialization is the same every time, making the entire training and prediction process reproducible. This is a standard practice in machine learning to ensure the stability and comparability of results.
+5. **Market Fluctuations Chart** ("Price History Analysis")
+   - Matplotlib line chart embedded in Qt
+   - Shows price trends over time
+   - Vintage newspaper styling (sepia tones, serif fonts)
+   - Minimum height: 200px
+
+6. **Geographic Distribution Map** ("Supermarket Locations")
+   - Interactive Leaflet.js map
+   - Grayscale tiles with sepia filter
+   - Custom markers (€ symbols) for purchase locations
+   - Popup tooltips showing supermarket, location, and price
+   - Geocoding for Münster, Germany locations
 
 ## How the Machine Learning Model Works
 
-The machine learning model in this project is designed to predict the best day to buy a product at the lowest price. It does this by analyzing historical price data and forecasting prices for the next seven days. Here’s a step-by-step breakdown of how it works:
+The ML model uses **Ridge Regression** (not neural networks) to predict optimal buying days based on historical price patterns.
 
-### 1. Model Architecture
+### 1. Model Choice: Ridge Regression
 
-The model is a simple **feedforward neural network** built using **PyTorch**. It consists of three fully connected (linear) layers with ReLU activation functions in between. The network takes a set of numerical features as input and outputs a single value, which is the predicted price.
+**Why Ridge Regression?**
+- **Stability for small datasets**: Linear models are more reliable than neural networks when data is limited
+- **Prevents overfitting**: L2 regularization (Ridge) penalizes extreme weight values
+- **Automatic hyperparameter tuning**: RidgeCV uses cross-validation to find optimal regularization strength (alpha/λ)
+- **Interpretable**: Can see which features (brand, location, day) most influence prices
+
+**Mathematical Foundation**:
+```
+Loss_Total = MSE + λ × Σ(weights²)
+```
+- MSE measures prediction accuracy
+- λ (lambda) prevents the model from over-adjusting to outliers
+- Cross-validation tests multiple λ values [0.1, 1.0, 10.0] to find the best one
 
 ### 2. Feature Engineering
 
-Before the data is fed into the model, it goes through a feature engineering process to create meaningful inputs for the model. This process involves:
+The model transforms raw data into meaningful numerical features:
 
-*   **Date-based Features**: The `date` of each purchase is used to extract the `day_of_week`, `day_of_year`, and `month`. These features help the model learn patterns related to time, such as weekly or seasonal price fluctuations.
-*   **Rolling Statistics**: A **rolling average** and **price volatility** (standard deviation) are calculated over a 7-day window. These features provide the model with information about the recent price trend and stability.
-*   **Categorical Features**: Text-based features like `brand_name`, `supermarket`, and `location` are converted into numerical format using **one-hot encoding**. This creates a binary column for each category, allowing the model to learn from these attributes.
-*   **Weight**: The `weight_grams` of the product is also used as a feature.
+**Temporal Features**:
+- `day_of_week` (0-6): Captures weekly patterns (e.g., weekend price changes)
+- `day_of_year` (1-365): Captures seasonal trends
+- `month` (1-12): Monthly patterns
+
+**Statistical Features**:
+- `rolling_avg`: 7-day moving average price (trend indicator)
+- `price_volatility`: 7-day price standard deviation (stability measure)
+
+**Categorical Features** (One-Hot Encoded):
+- `brand_name_*`: Binary columns for each brand
+- `supermarket_*`: Binary columns for each store
+- `location_*`: Binary columns for each location
+
+**Product Attributes**:
+- `weight_grams`: Product weight (for price normalization)
 
 ### 3. Training Process
 
-Every time you search for a product, the model is trained from scratch on the historical data for that specific product. The training process is as follows:
+**Every search triggers fresh model training**:
+1. Load historical data for selected product
+2. Apply feature engineering
+3. Scale features using StandardScaler (z = (x - μ) / σ)
+4. Train RidgeCV with 5-fold cross-validation
+5. RidgeCV automatically selects best alpha value
 
-*   **Data Preparation**: The historical data is converted into PyTorch tensors, which are the fundamental data structures used by the model.
-*   **Model Initialization**: A new instance of the `PricePredictor` model is created.
-*   **Loss Function**: The model uses the **Mean Squared Error (MSE)** loss function (`nn.MSELoss`), which measures the average squared difference between the predicted prices and the actual prices.
-*   **Optimizer**: The **Adam optimizer** (`optim.Adam`) is used to update the model's weights during training to minimize the loss.
-*   **Training Loop**: The model is trained for 100 epochs. In each epoch, it makes predictions on the training data, calculates the loss, and adjusts its weights to improve its accuracy.
+**Why train on every search?**
+- Each product has unique price patterns
+- Recent data might change predictions
+- Minimal computational cost (Ridge is fast)
 
 ### 4. Prediction Process
 
-After the model is trained, it is used to predict prices for the next seven days:
+1. **Generate future features**: Create feature vectors for next 7 days
+2. **Scale features**: Use same scaler from training
+3. **Predict prices**: Model outputs price for each day
+4. **Select best day**: Choose day with lowest predicted price
+5. **Calculate confidence**: Based on historical price volatility
+   - Low volatility → High confidence
+   - High volatility → Low confidence
 
-*   **Future Features**: A new set of features is created for the next seven days. These features are based on the most recent data point in the historical data.
-*   **Prediction**: The trained model predicts the price for each of the next seven days.
+### 5. Output & Recommendations
 
-### 5. Output
+**Recommendation Display**:
+- **Best Day**: Day of week with lowest predicted price
+- **Expected Price**: Predicted price for that day
+- **Confidence Index**: Percentage based on price stability
 
-The model's output is a set of price predictions for the next week. The day with the **lowest predicted price** is chosen as the "best day to buy". The final recommendation presented to the user includes:
+**Decision Logic**:
+- If confidence < 90%: "Confidence too low for reliable recommendation"
+- If best day is today: "BUY IT NOW!"
+- If best day is future: "HOLD YOUR WALLET!"
 
-*   The best day to buy.
-*   The predicted price for that day.
-*   A confidence score, which is a simple heuristic based on the historical price volatility.
+### 6. Model Reproducibility
 
-### 6. Reproducibility
+**Deterministic Behavior**:
+- Fixed random seed (`np.random.seed(42)`) ensures consistent results
+- Same input data → Same predictions every time
+- Critical for testing and validation
 
-To ensure that the model produces the same results every time for the same product, **random seeds** for `numpy` and `torch` are set at the beginning of the process. This makes the model's behavior deterministic and its predictions consistent.
+## Database Schema (Supabase)
+
+**Table**: `receipts`
+
+| Column          | Type    | Description                    |
+|----------------|---------|--------------------------------|
+| id             | int8    | Primary key (auto-increment)   |
+| item_name      | text    | Product name                   |
+| purchase_date  | date    | Date of purchase               |
+| weekday        | int2    | Day of week (0-6)              |
+| price_eur      | float4  | Price in euros                 |
+| supermarket    | text    | Store name (REWE, Lidl, Aldi)  |
+| location       | text    | Store location                 |
+| brand_name     | text    | Product brand (nullable)       |
+| weight_grams   | float4  | Product weight (nullable)      |
+
+## Key Features
+
+1. **Centralized Styling**: All visual design in `style.qss`, easy to modify theme
+2. **Interactive Map**: Geocoded locations with custom markers and popups
+3. **Smart Search**: Only updates on button click (not dropdown selection)
+4. **Dynamic UI**: Recommendation text changes based on confidence and timing
+5. **Data Validation**: Handles missing values, categorical encoding, feature scaling
+6. **Professional ML**: Uses scikit-learn best practices (CV, regularization, scaling)
+
+## Future Enhancements
+
+- Receipt image upload with OCR (OpenCV/Pillow)
+- Price prediction chart showing 7-day forecast
+- More sophisticated confidence metrics
+- Export recommendations to PDF/CSV
+- Multi-item comparison view
+- Price alerts and notifications
+
+## Dependencies
+
+```
+PySide6              # Qt GUI framework
+pandas               # Data manipulation
+numpy                # Numerical operations
+scikit-learn         # Machine learning (Ridge Regression, StandardScaler)
+supabase             # Database SDK
+python-dotenv        # Environment variable management
+matplotlib           # Chart visualization
+```
+
+## Environment Setup
+
+Required `.env` file:
+```
+SUPABASE_URL=your_supabase_project_url
+SUPABASE_KEY=your_supabase_anon_key
+```
+
+## Code Refactoring (December 2025)
+
+Recent improvements to codebase organization:
+1. **Merged** `supabase_client.py` into `database.py` (eliminated redundant file)
+2. **Consolidated** geocoding data to class-level in `map.py` (easier maintenance)
+3. **Extracted** all font styles and widget sizes from Python to QSS (centralized styling)
+4. **Fixed** search trigger to button-only (removed dropdown auto-search)
+
+Result: Cleaner code, fewer files, centralized styling, better maintainability.

@@ -56,10 +56,6 @@ class MainWindow(QMainWindow):
         masthead_layout.addWidget(separator_line)
         
         title = QLabel("The Dönerprice")
-        title_font = QFont("Noto Serif")
-        title_font.setPixelSize(68)
-        title_font.setWeight(QFont.Weight.Black)
-        title.setFont(title_font)
         title.setObjectName("masthead-title")
         title.setAlignment(Qt.AlignCenter)
         masthead_layout.addWidget(title)
@@ -72,15 +68,9 @@ class MainWindow(QMainWindow):
         sub_layout.addWidget(QLabel("Grocery Intelligence"))
         sub_layout.addStretch()
         date_label = QLabel(datetime.now().strftime("%A, %B %d, %Y"))
-        date_font = QFont("Noto Serif")
-        date_font.setWeight(QFont.Weight.Bold)
-        date_label.setFont(date_font)
         sub_layout.addWidget(date_label)
         sub_layout.addStretch()
         berlin_label = QLabel("Muenster Edition")
-        berlin_font = QFont("Noto Serif")
-        berlin_font.setWeight(QFont.Weight.Bold)
-        berlin_label.setFont(berlin_font)
         sub_layout.addWidget(berlin_label)
         masthead_layout.addWidget(sub_header)
 
@@ -111,9 +101,6 @@ class MainWindow(QMainWindow):
         search_title_layout.setContentsMargins(0, 0, 0, 0)
         
         search_title = QLabel("Search Archives")
-        search_font = QFont("Noto Serif")
-        search_font.setWeight(QFont.Weight.DemiBold)
-        search_title.setFont(search_font)
         search_title.setProperty("class", "panel-title")
         search_title_layout.addWidget(search_title)
         search_inner_layout.addWidget(search_title_container)
@@ -123,7 +110,6 @@ class MainWindow(QMainWindow):
         self.search_input.setPlaceholderText("Product Name")
         self.search_input.setInsertPolicy(QComboBox.NoInsert)
         self.search_input.completer().setCompletionMode(QCompleter.PopupCompletion)
-        self.search_input.setFixedWidth(500)
         
         item_names = database.get_all_item_names()
         self.search_input.addItems(item_names)
@@ -137,15 +123,12 @@ class MainWindow(QMainWindow):
         self.brand_input.setInsertPolicy(QComboBox.NoInsert)
         self.brand_input.completer().setCompletionMode(QCompleter.PopupCompletion)
         self.brand_input.setVisible(True)
-        self.brand_input.setFixedWidth(500)
         
         search_inner_layout.addWidget(self.brand_input, 0, Qt.AlignCenter)
 
         self.search_button = QPushButton("Search")
         self.search_button.setObjectName("search-button")
-        self.search_button.setFixedWidth(300)
         self.search_button.clicked.connect(self.search_item)
-        self.search_input.activated.connect(self.search_item) 
         search_inner_layout.addWidget(self.search_button, 0, Qt.AlignCenter)
         
         search_panel_layout.addWidget(search_inner)
@@ -232,7 +215,6 @@ class MainWindow(QMainWindow):
         self.history_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
         self.history_table.horizontalHeader().setStretchLastSection(True)
         self.history_table.horizontalHeader().sectionClicked.connect(self.sort_table)
-        self.history_table.setMinimumHeight(200)
         table_inner_layout.addWidget(self.history_table)
         
         table_panel_layout.addWidget(table_inner)
@@ -265,8 +247,6 @@ class MainWindow(QMainWindow):
         chart_inner_layout.addWidget(chart_subtitle)
 
         self.price_chart = PriceChart()
-        self.price_chart.setObjectName("chart-panel")
-        self.price_chart.setMinimumHeight(200) # Modified line
         chart_inner_layout.addWidget(self.price_chart)
         
         chart_panel_layout.addWidget(chart_inner)
