@@ -3,15 +3,64 @@ from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtGui import Qt # Import Qt for alignment
 import json
 import pandas as pd # Import pandas for DataFrame type hinting
+import requests
+from time import sleep
 
 class VintageMap(QWidget):
-    # Geocoding mapping for Münster supermarkets
-    # Format: (supermarket, location) -> (latitude, longitude)
-    GEOCODING_MAP = {
-        ("REWE", "Münster Center"): (51.967, 7.633),
-        ("Lidl", "Münster Süd"): (51.942, 7.625),
-        ("Aldi", "Münster Nord"): (51.985, 7.615),
-    }
+    # Cache for geocoded locations to avoid repeated API calls
+    _geocode_cache = {}
+    
+    @staticmethod
+    def geocode_location(supermarket, location):
+        """
+        Geocode a location using Nominatim API (OpenStreetMap).
+        Returns (latitude, longitude) tuple or None if geocoding fails.
+        Caches results to avoid repeated API calls.
+        """
+        # Check cache first
+        cache_key = (supermarket, location)
+        if cache_key in VintageMap._geocode_cache:
+            return VintageMap._geocode_cache[cache_key]
+        
+        # Construct search query: "Supermarket Location, Münster, Germany"
+        query = f"{supermarket} {location}, Münster, Germany"
+        
+        try:
+            # Use Nominatim API (free, no API key required)
+            # User-Agent is required by Nominatim's usage policy
+            url = "https://nominatim.openstreetmap.org/search"
+            params = {
+                'q': query,
+                'format': 'json',
+                'limit': 1
+            }
+            headers = {
+                'User-Agent': 'Donerpricer/1.0 (Educational Project)'
+            }
+            
+            response = requests.get(url, params=params, headers=headers, timeout=5)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data:
+                    lat = float(data[0]['lat'])
+                    lon = float(data[0]['lon'])
+                    result = (lat, lon)
+                    
+                    # Cache the result
+                    VintageMap._geocode_cache[cache_key] = result
+                    
+                    # Be respectful to the API - wait 1 second between requests
+                    sleep(1)
+                    
+                    return result
+        except Exception as e:
+            print(f"Geocoding error for {query}: {e}")
+        
+        # If geocoding fails, return Münster city center as fallback
+        fallback = (51.9607, 7.6261)
+        VintageMap._geocode_cache[cache_key] = fallback
+        return fallback
     
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -97,14 +146,15 @@ class VintageMap(QWidget):
         self.setMinimumHeight(300)
 
     def update_map(self, df: pd.DataFrame):
-        """Update map with markers from DataFrame using class-level geocoding data."""
+        """Update map with markers from DataFrame using API-based geocoding."""
         print(f"VintageMap.update_map called with {len(df)} records")
         
         data = []
         for _, row in df.iterrows():
-            key = (row['supermarket'], row['location'])
-            if key in self.GEOCODING_MAP:
-                lat, lng = self.GEOCODING_MAP[key]
+            # Use API-based geocoding for each location
+            coords = self.geocode_location(row['supermarket'], row['location'])
+            if coords:
+                lat, lng = coords
                 data.append({
                     'lat': lat,
                     'lng': lng,

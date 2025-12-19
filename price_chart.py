@@ -28,6 +28,7 @@ class PriceChart(QWidget):
         print(f"PriceChart.plot called with {len(df)} records")
         self.df = df # Store the dataframe
         self.figure.clear() # Clear the figure
+        self.annot = None  # Reset annotation when clearing to avoid orphaned axes reference
         self.ax = self.figure.add_subplot(111) # Re-assign ax after clearing the figure
         # Set facecolor again after clear
         self.figure.set_facecolor('#fdfbf7')
@@ -114,41 +115,49 @@ class PriceChart(QWidget):
                 renderer = self.canvas.get_renderer()
                 self.annot.set_visible(True) # Temporarily make visible to get extent
                 self.canvas.draw() # Draw to update extent
-                bbox_ann = self.annot.get_window_extent(renderer)
-                bbox_ax = self.ax.bbox
+                
+                # Safety check: ensure annotation has valid axes before getting extent
+                if self.annot.axes is not None:
+                    bbox_ann = self.annot.get_window_extent(renderer)
+                    bbox_ax = self.ax.bbox
 
-                # Check for overlap and adjust position
-                # 10% overlap threshold
-                overlap_threshold_x = bbox_ann.width * 0.1
-                overlap_threshold_y = bbox_ann.height * 0.1
+                # Safety check: ensure annotation has valid axes before getting extent
+                if self.annot.axes is not None:
+                    bbox_ann = self.annot.get_window_extent(renderer)
+                    bbox_ax = self.ax.bbox
 
-                # Check right boundary
-                if bbox_ann.x1 > bbox_ax.x1 - overlap_threshold_x:
-                    ha = 'right'
-                    x_offset = -10 # Adjust offset for right alignment
-                # Check left boundary
-                elif bbox_ann.x0 < bbox_ax.x0 + overlap_threshold_x:
-                    ha = 'left'
-                    x_offset = 10 # Adjust offset for left alignment
-                else:
-                    ha = 'left'
-                    x_offset = 10
+                    # Check for overlap and adjust position
+                    # 10% overlap threshold
+                    overlap_threshold_x = bbox_ann.width * 0.1
+                    overlap_threshold_y = bbox_ann.height * 0.1
 
-                # Check top boundary
-                if bbox_ann.y1 > bbox_ax.y1 - overlap_threshold_y:
-                    va = 'top'
-                    y_offset = -10 # Adjust offset for top alignment
-                # Check bottom boundary
-                elif bbox_ann.y0 < bbox_ax.y0 + overlap_threshold_y:
-                    va = 'bottom'
-                    y_offset = 10 # Adjust offset for bottom alignment
-                else:
-                    va = 'bottom'
-                    y_offset = 10
+                    # Check right boundary
+                    if bbox_ann.x1 > bbox_ax.x1 - overlap_threshold_x:
+                        ha = 'right'
+                        x_offset = -10 # Adjust offset for right alignment
+                    # Check left boundary
+                    elif bbox_ann.x0 < bbox_ax.x0 + overlap_threshold_x:
+                        ha = 'left'
+                        x_offset = 10 # Adjust offset for left alignment
+                    else:
+                        ha = 'left'
+                        x_offset = 10
 
-                self.annot.set_position((x_offset, y_offset))
-                self.annot.set_ha(ha)
-                self.annot.set_va(va)
+                    # Check top boundary
+                    if bbox_ann.y1 > bbox_ax.y1 - overlap_threshold_y:
+                        va = 'top'
+                        y_offset = -10 # Adjust offset for top alignment
+                    # Check bottom boundary
+                    elif bbox_ann.y0 < bbox_ax.y0 + overlap_threshold_y:
+                        va = 'bottom'
+                        y_offset = 10 # Adjust offset for bottom alignment
+                    else:
+                        va = 'bottom'
+                        y_offset = 10
+
+                    self.annot.set_position((x_offset, y_offset))
+                    self.annot.set_ha(ha)
+                    self.annot.set_va(va)
                 
                 self.annot.set_visible(True)
                 self.canvas.draw_idle()
