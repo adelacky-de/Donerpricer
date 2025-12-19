@@ -1,36 +1,16 @@
 import pandas as pd
 import numpy as np
-from sklearn.linear_model import LinearRegression
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import RidgeCV
 from datetime import datetime, timedelta
-import torch
-import torch.nn as nn
-import torch.optim as optim
-
-# Define the PyTorch model
-class PricePredictor(nn.Module):
-    def __init__(self, input_size):
-        super(PricePredictor, self).__init__()
-        self.fc1 = nn.Linear(input_size, 64)
-        self.relu = nn.ReLU()
-        self.fc2 = nn.Linear(64, 32)
-        self.fc3 = nn.Linear(32, 1)
-
-    def forward(self, x):
-        x = self.fc1(x)
-        x = self.relu(x)
-        x = self.fc2(x)
-        x = self.relu(x)
-        x = self.fc3(x)
-        return x
 
 def get_recommendation(df):
     """
     Generates a recommendation based on historical price data using a simple linear regression model.
     Returns a dictionary with recommendation string and confidence score.
     """
-    # Set random seeds for reproducibility
+    # Set random seed for reproducibility
     np.random.seed(42)
-    torch.manual_seed(42)
 
     if len(df) < 2:
         return {"recommendation": "Not enough data for a recommendation.", "confidence": 0}
@@ -74,30 +54,20 @@ def get_recommendation(df):
         if X[col].dtype == 'bool':
             X[col] = X[col].astype(int)
 
-    # Ensure all columns are numeric (float32) and handle any remaining non-numeric data
-    X = X.apply(pd.to_numeric, errors='coerce').fillna(0).astype(np.float32)
+    # Ensure all columns are numeric and handle any remaining non-numeric data
+    X = X.apply(pd.to_numeric, errors='coerce').fillna(0)
 
-    # Convert to PyTorch tensors
-    X_tensor = torch.tensor(X.values, dtype=torch.float32)
-    y_tensor = torch.tensor(y.values, dtype=torch.float32).view(-1, 1)
+    # Feature Scaling - Fairness Training (as shown in notebook)
+    # Math: z = (x - μ) / σ
+    # This ensures all features are on a similar scale, making regularization fair
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(X)
 
-    # Initialize model, loss, and optimizer
-    input_size = X_tensor.shape[1]
-    model = PricePredictor(input_size)
-    criterion = nn.MSELoss()
-    optimizer = optim.Adam(model.parameters(), lr=0.01)
-
-    # Training loop
-    num_epochs = 100
-    for epoch in range(num_epochs):
-        # Forward pass
-        outputs = model(X_tensor)
-        loss = criterion(outputs, y_tensor)
-
-        # Backward and optimize
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
+    # Train Ridge Regression with Cross-Validation
+    # CV=5 means 5-fold cross-validation to find the best alpha (lambda)
+    # The model automatically tests [0.1, 1.0, 10.0] and chooses the best
+    model = RidgeCV(alphas=[0.1, 1.0, 10.0], cv=5)
+    model.fit(X_scaled, y)
 
     # Predict for the next 7 days
     today = datetime.now()
@@ -126,14 +96,12 @@ def get_recommendation(df):
             future_features_df[col] = 0
     future_features_df = future_features_df[X.columns] # Ensure order is the same
 
-    # Ensure all columns in future_features_df are numeric (float32)
-    future_features_df = future_features_df.apply(pd.to_numeric, errors='coerce').fillna(0).astype(np.float32)
+    # Ensure all columns in future_features_df are numeric
+    future_features_df = future_features_df.apply(pd.to_numeric, errors='coerce').fillna(0)
 
-    # Convert future features to PyTorch tensor and make predictions
-    future_features_tensor = torch.tensor(future_features_df.values, dtype=torch.float32)
-    model.eval() # Set model to evaluation mode
-    with torch.no_grad():
-        predictions = model(future_features_tensor).numpy().flatten()
+    # Scale future features and make predictions
+    future_features_scaled = scaler.transform(future_features_df)
+    predictions = model.predict(future_features_scaled)
     
     # Find best day to buy
     best_day_index = np.argmin(predictions)
