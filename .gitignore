@@ -5,3 +5,6 @@ venv/
 temp_design_repo/
 .DS_Store
 Data/
+scripts/
+TaskList.txt
+requirements.txt
