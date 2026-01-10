@@ -12,6 +12,14 @@ The Dönerpricer is a comprehensive price tracking system that:
 - Visualizes price history and geographic distribution of purchases
 - Features a distinctive vintage newspaper aesthetic
 
+### App Inspiration
+The name "Dönerpricer" is inspired by a common local German student saying: using the price of a Döner Kebab as a benchmark to check inflation. Just as the Döner Index tracks the rising cost of living, this app aims to track and predict grocery prices in a similar spirit.
+
+### Data Origin
+- **Real Data**: Data entries without the "M_" prefix are real-world data points collected over 3 months of living in Münster.
+- **Mock Data**: Entries prefixed with "M_" (e.g., `M_Doner Kebab`) are mocked data used to test variables and model behavior.
+- **Accuracy Note**: Currently, the prediction data volume is limited. The model's accuracy is expected to improve significantly after a few more months of data collection.
+
 ## Feasibility as Course Project
 
 - **Fits course requirements**: Stand-alone Python app with clear GUI, data I/O (database integration), time-series visualization, and ML component for price prediction
@@ -196,7 +204,8 @@ The model transforms raw data into meaningful numerical features:
 | Column          | Type    | Description                    |
 |----------------|---------|--------------------------------|
 | id             | int8    | Primary key (auto-increment)   |
-| item_name      | text    | Product name                   |
+| item_name      | text    | Product name (German/Original) |
+| item_name_en   | text    | Product name (English/Normalized)|
 | purchase_date  | date    | Date of purchase               |
 | weekday        | int2    | Day of week (0-6)              |
 | price_eur      | float4  | Price in euros                 |
@@ -204,6 +213,19 @@ The model transforms raw data into meaningful numerical features:
 | location       | text    | Store location                 |
 | brand_name     | text    | Product brand (nullable)       |
 | weight_grams   | float4  | Product weight (nullable)      |
+
+## Educational Resources: Building from Scratch (`Helper_notes`)
+
+The `Helper_notes` directory contains a comprehensive, step-by-step curriculum designed to teach you how to build this application from the ground up. It covers everything from database connection to UI design.
+
+**Curriculum / Notebooks:**
+1.  **`1. DB_Connection.ipynb`**: Setting up Supabase and connecting Python to a cloud database.
+2.  **`2.1 ML_Donerpricer.ipynb`** & **`2.2 AML_Donerpricer.ipynb`**: Building the Machine Learning brain (Ridge Regression, Feature Engineering, Future Forecasting).
+3.  **`3. Plot_Hover_Style.ipynb`**: Creating interactive Matplotlib charts and styling them for the GUI.
+4.  **`4. OSMmap_Label.ipynb`**: Integrating Leaflet maps and geocoding locations.
+5.  **`5. MainFunctions.ipynb`**: Wiring everything together into the main application logic.
+
+These notebooks are not just theoretical; they are the actual building blocks of the Dönerpricer.
 
 ## Key Features
 
