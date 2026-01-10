@@ -64,9 +64,19 @@ def get_recommendation(df):
     X_scaled = scaler.fit_transform(X)
 
     # Train Ridge Regression with Cross-Validation
-    # CV=5 means 5-fold cross-validation to find the best alpha (lambda)
-    # The model automatically tests [0.1, 1.0, 10.0] and chooses the best
-    model = RidgeCV(alphas=[0.1, 1.0, 10.0], cv=5)
+    # Adjust CV based on number of samples
+    n_samples = len(X_scaled)
+    if n_samples < 2:
+        # Should be caught above, but safe fallback
+        return {"recommendation": "Not enough data.", "confidence": 0}
+    elif n_samples < 5:
+        # Use Leave-One-Out Cross-Validation (implied by cv=None for RidgeCV with some solvers) 
+        # or just a smaller K. RidgeCV(cv=None) defaults to efficient LOOCV.
+        cv_val = None 
+    else:
+        cv_val = 5
+
+    model = RidgeCV(alphas=[0.1, 1.0, 10.0], cv=cv_val)
     model.fit(X_scaled, y)
 
     # Predict for the next 7 days
@@ -116,7 +126,8 @@ def get_recommendation(df):
     if df['price_volatility'].mean() == 0:
         confidence = 100
     else:
-        confidence = max(0, min(100, int(100 - (df['price_volatility'].mean() * 50)))) # Scale volatility to confidence
+        # Scale volatility to confidence. Lower multiplier means less sensitive to price variance.
+        confidence = max(0, min(100, int(100 - (df['price_volatility'].mean() * 20))))
     recommendation_header_str = "Prediction"
     recommendation_str = ""
     recommendation_str += f"Best day to buy: {best_day}\n"

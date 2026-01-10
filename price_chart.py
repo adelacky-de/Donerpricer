@@ -6,11 +6,48 @@ import matplotlib.dates as mdates
 import matplotlib.ticker as mticker
 import matplotlib.pyplot as plt # Import pyplot for event handling
 
+# Chart Styling Configuration - Centralized styling (Vintage Newspaper Theme)
+CHART_STYLE = {
+    # Colors (matching vintage newspaper aesthetic from style.qss)
+    'background_color': '#fdfbf7',  # Paper color
+    'ink_color': '#1a1a1a',          # Ink color
+    'grey_color': '#666666',          # Muted grey for placeholders
+    
+    # Line and marker styling
+    'line_width': 2,
+    'line_color': '#1a1a1a',
+    'marker_style': 'o',
+    'marker_size': 4,
+    'marker_face_color': 'white',
+    'marker_edge_color': '#1a1a1a',
+    
+    # Grid styling
+    'grid_linestyle': '--',
+    'grid_alpha': 0.3,
+    'grid_color': '#1a1a1a',
+    
+    # Fonts
+    'font_family': 'Noto Serif',
+    'tick_font_size': 8,
+    'annotation_font_size': 8,
+    
+    # Axis styling
+    'y_tick_interval': 0.2,
+    
+    # Annotation styling
+    'annotation_box_style': 'round,pad=0.5',
+    'annotation_bg_color': 'white',
+    'annotation_edge_color': 'k',
+    'annotation_line_width': 1,
+    'annotation_alpha': 0.7,
+    'annotation_offset': 10,
+}
+
 class PriceChart(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         # Use the paper color for the figure background
-        self.figure = Figure(dpi=100, facecolor='#fdfbf7')
+        self.figure = Figure(dpi=100, facecolor=CHART_STYLE['background_color'])
         self.canvas = FigureCanvas(self.figure)
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
@@ -31,14 +68,14 @@ class PriceChart(QWidget):
         self.annot = None  # Reset annotation when clearing to avoid orphaned axes reference
         self.ax = self.figure.add_subplot(111) # Re-assign ax after clearing the figure
         # Set facecolor again after clear
-        self.figure.set_facecolor('#fdfbf7')
-        self.ax.set_facecolor('#fdfbf7')
+        self.figure.set_facecolor(CHART_STYLE['background_color'])
+        self.ax.set_facecolor(CHART_STYLE['background_color'])
         
         # Remove top and right spines for a cleaner look
         self.ax.spines['top'].set_visible(False)
         self.ax.spines['right'].set_visible(False)
-        self.ax.spines['left'].set_color('#1a1a1a')
-        self.ax.spines['bottom'].set_color('#1a1a1a')
+        self.ax.spines['left'].set_color(CHART_STYLE['ink_color'])
+        self.ax.spines['bottom'].set_color(CHART_STYLE['ink_color'])
 
         if not self.df.empty:
             print("Plotting data...")
@@ -47,18 +84,30 @@ class PriceChart(QWidget):
             
             # Use 'step' plot with 'post' (equivalent to stepAfter)
             # Use ink-black for the line
-            self.line, = self.ax.step(self.df['date'], self.df['price'], where='post', color='#1a1a1a', linewidth=2, marker='o', markersize=4, markerfacecolor='white', markeredgecolor='#1a1a1a')
+            self.line, = self.ax.step(self.df['date'], self.df['price'], where='post', 
+                                     color=CHART_STYLE['line_color'], 
+                                     linewidth=CHART_STYLE['line_width'], 
+                                     marker=CHART_STYLE['marker_style'], 
+                                     markersize=CHART_STYLE['marker_size'], 
+                                     markerfacecolor=CHART_STYLE['marker_face_color'], 
+                                     markeredgecolor=CHART_STYLE['marker_edge_color'])
             
             # Set x-axis tick labels
             self.ax.xaxis.set_major_formatter(mdates.DateFormatter('%d/%m'))
-            self.ax.tick_params(axis='x', labelsize=8, colors='#1a1a1a', labelfontfamily='Noto Serif')
-            self.ax.tick_params(axis='y', labelsize=8, colors='#1a1a1a', labelfontfamily='Noto Serif')
+            self.ax.tick_params(axis='x', labelsize=CHART_STYLE['tick_font_size'], 
+                              colors=CHART_STYLE['ink_color'], 
+                              labelfontfamily=CHART_STYLE['font_family'])
+            self.ax.tick_params(axis='y', labelsize=CHART_STYLE['tick_font_size'], 
+                              colors=CHART_STYLE['ink_color'], 
+                              labelfontfamily=CHART_STYLE['font_family'])
             
             # Set y-axis interval
-            self.ax.yaxis.set_major_locator(mticker.MultipleLocator(0.2))
+            self.ax.yaxis.set_major_locator(mticker.MultipleLocator(CHART_STYLE['y_tick_interval']))
             
             # Add grid lines (horizontal only, dashed)
-            self.ax.yaxis.grid(True, linestyle='--', alpha=0.3, color='#1a1a1a')
+            self.ax.yaxis.grid(True, linestyle=CHART_STYLE['grid_linestyle'], 
+                             alpha=CHART_STYLE['grid_alpha'], 
+                             color=CHART_STYLE['grid_color'])
             self.ax.xaxis.grid(False)
 
             self.figure.tight_layout()
@@ -70,7 +119,7 @@ class PriceChart(QWidget):
                     transform=self.ax.transAxes,
                     fontfamily='serif',
                     fontstyle='italic',
-                    color='#666666')
+                    color=CHART_STYLE['grey_color'])
             
             # Hide axes for empty state
             self.ax.set_axis_off()
@@ -92,7 +141,7 @@ class PriceChart(QWidget):
                 ydata = price
                 
                 # Default text offset and alignment
-                x_offset, y_offset = 10, 10 # Reduced initial offset
+                x_offset, y_offset = CHART_STYLE['annotation_offset'], CHART_STYLE['annotation_offset']
                 ha = 'left'
                 va = 'bottom'
 
@@ -101,15 +150,25 @@ class PriceChart(QWidget):
                 if self.annot is None:
                     self.annot = self.ax.annotate(text, xy=(xdata, ydata), xytext=(x_offset, y_offset),
                                                 textcoords="offset points",
-                                                bbox=dict(boxstyle="round,pad=0.5", fc="white", ec="k", lw=1, alpha=0.7), # Changed alpha
+                                                bbox=dict(boxstyle=CHART_STYLE['annotation_box_style'], 
+                                                         fc=CHART_STYLE['annotation_bg_color'], 
+                                                         ec=CHART_STYLE['annotation_edge_color'], 
+                                                         lw=CHART_STYLE['annotation_line_width'], 
+                                                         alpha=CHART_STYLE['annotation_alpha']),
                                                 arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=0"),
-                                                ha=ha, va=va, fontsize=8, color='#1a1a1a') # Added fontsize and color
+                                                ha=ha, va=va, 
+                                                fontsize=CHART_STYLE['annotation_font_size'], 
+                                                color=CHART_STYLE['ink_color'])
                 else:
                     self.annot.xy = (xdata, ydata)
                     self.annot.set_text(text)
-                    self.annot.set_bbox(dict(boxstyle="round,pad=0.5", fc="white", ec="k", lw=1, alpha=0.7)) # Changed alpha
-                    self.annot.set_fontsize(8) # Set fontsize
-                    self.annot.set_color('#1a1a1a') # Set color
+                    self.annot.set_bbox(dict(boxstyle=CHART_STYLE['annotation_box_style'], 
+                                            fc=CHART_STYLE['annotation_bg_color'], 
+                                            ec=CHART_STYLE['annotation_edge_color'], 
+                                            lw=CHART_STYLE['annotation_line_width'], 
+                                            alpha=CHART_STYLE['annotation_alpha']))
+                    self.annot.set_fontsize(CHART_STYLE['annotation_font_size'])
+                    self.annot.set_color(CHART_STYLE['ink_color'])
 
                 # Get the renderer to calculate text extent
                 renderer = self.canvas.get_renderer()
@@ -134,26 +193,26 @@ class PriceChart(QWidget):
                     # Check right boundary
                     if bbox_ann.x1 > bbox_ax.x1 - overlap_threshold_x:
                         ha = 'right'
-                        x_offset = -10 # Adjust offset for right alignment
+                        x_offset = -CHART_STYLE['annotation_offset']
                     # Check left boundary
                     elif bbox_ann.x0 < bbox_ax.x0 + overlap_threshold_x:
                         ha = 'left'
-                        x_offset = 10 # Adjust offset for left alignment
+                        x_offset = CHART_STYLE['annotation_offset']
                     else:
                         ha = 'left'
-                        x_offset = 10
+                        x_offset = CHART_STYLE['annotation_offset']
 
                     # Check top boundary
                     if bbox_ann.y1 > bbox_ax.y1 - overlap_threshold_y:
                         va = 'top'
-                        y_offset = -10 # Adjust offset for top alignment
+                        y_offset = -CHART_STYLE['annotation_offset']
                     # Check bottom boundary
                     elif bbox_ann.y0 < bbox_ax.y0 + overlap_threshold_y:
                         va = 'bottom'
-                        y_offset = 10 # Adjust offset for bottom alignment
+                        y_offset = CHART_STYLE['annotation_offset']
                     else:
                         va = 'bottom'
-                        y_offset = 10
+                        y_offset = CHART_STYLE['annotation_offset']
 
                     self.annot.set_position((x_offset, y_offset))
                     self.annot.set_ha(ha)

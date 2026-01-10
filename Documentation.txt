@@ -107,7 +107,7 @@ The application features a distinctive vintage newspaper aesthetic inspired by e
 
 ## How the Machine Learning Model Works
 
-The ML model uses **Ridge Regression** (not neural networks) to predict optimal buying days based on historical price patterns.
+The ML model uses **Ridge Regression** to predict optimal buying days based on historical price patterns.
 
 ### 1. Model Choice: Ridge Regression
 
@@ -180,7 +180,7 @@ The model transforms raw data into meaningful numerical features:
 **Decision Logic**:
 - If confidence < 90%: "Confidence too low for reliable recommendation"
 - If best day is today: "BUY IT NOW!"
-- If best day is future: "HOLD YOUR WALLET!"
+- If best day is future (not today): "HOLD YOUR WALLET!"
 
 ### 6. Model Reproducibility
 
@@ -251,4 +251,3 @@ Recent improvements to codebase organization:
 3. **Extracted** all font styles and widget sizes from Python to QSS (centralized styling)
 4. **Fixed** search trigger to button-only (removed dropdown auto-search)
 
-Result: Cleaner code, fewer files, centralized styling, better maintainability.

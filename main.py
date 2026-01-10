@@ -113,18 +113,18 @@ class MainWindow(QMainWindow):
         
         item_names = database.get_all_item_names()
         self.search_input.addItems(item_names)
-        self.search_input.currentTextChanged.connect(self.update_brand_input)
+        self.search_input.currentTextChanged.connect(self.update_supermarket_input)
         
         search_inner_layout.addWidget(self.search_input, 0, Qt.AlignCenter)
         
-        self.brand_input = QComboBox()
-        self.brand_input.setEditable(True)
-        self.brand_input.setPlaceholderText("Brand (Optional)")
-        self.brand_input.setInsertPolicy(QComboBox.NoInsert)
-        self.brand_input.completer().setCompletionMode(QCompleter.PopupCompletion)
-        self.brand_input.setVisible(True)
+        self.supermarket_input = QComboBox()
+        self.supermarket_input.setEditable(True)
+        self.supermarket_input.setPlaceholderText("Supermarket (Optional)")
+        self.supermarket_input.setInsertPolicy(QComboBox.NoInsert)
+        self.supermarket_input.completer().setCompletionMode(QCompleter.PopupCompletion)
+        self.supermarket_input.setVisible(True)
         
-        search_inner_layout.addWidget(self.brand_input, 0, Qt.AlignCenter)
+        search_inner_layout.addWidget(self.supermarket_input, 0, Qt.AlignCenter)
 
         self.search_button = QPushButton("Search")
         self.search_button.setObjectName("search-button")
@@ -285,10 +285,10 @@ class MainWindow(QMainWindow):
 
     def search_item(self):
         item_name = self.search_input.currentText() # Get text from QComboBox
-        brand_name = self.brand_input.currentText()
-        print(f"Searching for: {item_name}, Brand: {brand_name}")
+        supermarket_name = self.supermarket_input.currentText()
+        print(f"Searching for: {item_name}, Supermarket: {supermarket_name}")
         if item_name:
-            df = database.get_prices_by_item_and_brand(item_name, brand_name if brand_name and self.brand_input.isVisible() else None)
+            df = database.get_prices_by_item_and_supermarket(item_name, supermarket_name if supermarket_name and self.supermarket_input.isVisible() else None)
             print(f"Found {len(df)} records")
             self.current_df = df # Store DataFrame for sorting
             self.populate_table(df)
@@ -297,14 +297,19 @@ class MainWindow(QMainWindow):
             # Update Recommendation Panel
             # Parse the recommendation string from ml_model.py
             lines = ml_result["recommendation"].split("\n")
-            best_day = lines[0].split(": ")[1] if len(lines) > 0 else "-"
-            best_price = lines[1].split(": ")[1] if len(lines) > 1 else "-"
-            confidence = float(lines[2].split(": ")[1].replace('%', '')) if len(lines) > 2 else 0.0
+            if len(lines) >= 3 and ": " in lines[0]:
+                best_day = lines[0].split(": ")[1]
+                best_price = lines[1].split(": ")[1]
+                confidence = float(lines[2].split(": ")[1].replace('%', ''))
+            else:
+                best_day = "-"
+                best_price = "- (Not enough data)"
+                confidence = 0.0
             
             # Only "BUY IT NOW!" if the best day is today
             today_name = datetime.now().strftime("%A")
             
-            if confidence < 90.0:
+            if confidence < 70.0:
                 self.recommendation_header.setText("Confidence too low for a reliable recommendation.")
                 self.day_value.setText("-")
                 self.price_value.setText("€ -")
@@ -347,16 +352,16 @@ class MainWindow(QMainWindow):
         self.current_sort_column = column_index
         self.history_table.sortItems(column_index, self.sort_order)
 
-    def update_brand_input(self, text):
-        brands = database.get_brands_for_item(text)
-        if brands:
-            self.brand_input.clear()
-            self.brand_input.addItems(brands)
-            self.brand_input.setVisible(True)
+    def update_supermarket_input(self, text):
+        supermarkets = database.get_supermarkets_for_item(text)
+        if supermarkets:
+            self.supermarket_input.clear()
+            self.supermarket_input.addItems(supermarkets)
+            self.supermarket_input.setVisible(True)
         else:
-            self.brand_input.clear()
-            # self.brand_input.setVisible(False) # Removed to keep it always visible
-            self.brand_input.setVisible(True) # Ensure it's visible even if no brands
+            self.supermarket_input.clear()
+            # self.supermarket_input.setVisible(False) # Removed to keep it always visible
+            self.supermarket_input.setVisible(True) # Ensure it's visible even if no supermarkets
 
 
 if __name__ == "__main__":
